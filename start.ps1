@@ -58,4 +58,5 @@ Set-AzKeyVaultSecret -VaultName $kvname -Name "SQLdevpassword" -SecretValue $sec
 
 #run the bicep file
 
-new-AzResourceGroupDeployment -TemplateFile main.bicep -keyVaultName $kvname -keyVaultObjectId $keyvaultojectId -randNumb $Randnumb
+new-AzResourceGroupDeployment -TemplateFile main.bicep -keyVaultName $kvname -keyVaultObjectId $keyvaultojectId 
+# -randNumb $Randnumb

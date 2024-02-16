@@ -3,8 +3,8 @@ param paramLogAnalyticsName string = 'log-core-${paramlocation}-001-123'
 param paramAppInsightsName string = 'appinsights-001'
 
 param keyVaultObjectId string
-param randNumb string
 param keyVaultName string
+param randNumb string = '16022023'
 
 var varSqlEndpoint = 'privatelink${environment().suffixes.sqlServerHostname}'
 var varKeyVaultEndpoint = 'privatelink${environment().suffixes.keyvaultDns}'
@@ -89,7 +89,6 @@ module modCore 'modules/core.bicep' = {
     VMpassword: resKeyVault.getSecret('VMpassword')
     resRouteTable: modRoutes.outputs.outRouteToAfw
     keyVaultCoreObjectId: keyVaultObjectId
-    randNumb: randNumb
     osType: 'windows'
     storageUri: modProd.outputs.outStorageAccountEndpoint
     paramKeyVaultPrivateDnsZoneName: modPrivateDnsZoneKeyVault.outputs.outPrivateDnsZoneName

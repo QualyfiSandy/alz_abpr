@@ -8,7 +8,6 @@ param resRouteTable string
 param paramlocation string = resourceGroup().location
 param tenantId string = subscription().tenantId
 param keyVaultCoreObjectId string
-param randNumb string
 param storageUri string
 param paramStPrivateDnsZoneName string
 param SqlDbPrivateDnsZoneName string
@@ -300,7 +299,7 @@ resource DiskEncryption 'Microsoft.Compute/virtualMachines/extensions@2020-06-01
 // <-- KEY VAULT RESOURCES --> //
 
 resource reskeyVaultCore 'Microsoft.KeyVault/vaults@2019-09-01' = {
-  name: 'kv-encrypt-core-${randNumb}'
+  name: 'kv-encrypt-core-sandy'
   tags: {
     Owner: 'Sandy'
     Dept: 'Core'
