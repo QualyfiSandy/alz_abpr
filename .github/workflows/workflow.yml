@@ -8,7 +8,6 @@ permissions:
 
 env:
     AZURE_RESOURCEGROUP_NAME: rg-github-actions-landing-zone-sandy
-    ENVIRONMENT: nonprod
 
 jobs:
   deploy:
