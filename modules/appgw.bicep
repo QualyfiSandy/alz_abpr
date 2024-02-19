@@ -3,8 +3,6 @@ param paramlocation string
 param paramAgwSubnetId string
 param paramProdFqdn string
 
-var varAgwId = resourceId('Microsoft.Network/applicationGateways', paramAppGatewayName)
-
 // <-- APPLICATION GATEWAY RESOURCES --> //
 resource resApplicationGateway 'Microsoft.Network/applicationGateways@2020-11-01' = {
   name: paramAppGatewayName
@@ -77,10 +75,10 @@ resource resApplicationGateway 'Microsoft.Network/applicationGateways@2020-11-01
         name: 'myListener'
         properties: {
           frontendIPConfiguration: {
-            id: '${varAgwId}/frontendIPConfigurations/appGatewayFrontendIp'
+            id: resourceId('Microsoft.Network/applicationGateways/frontendIPConfigurations', paramAppGatewayName, 'appGatewayFrontendIp')
           }
           frontendPort: {
-            id: '${varAgwId}/frontendPorts/port_80'
+            id: resourceId('Microsoft.Network/applicationGateways/frontendPorts', paramAppGatewayName, 'port_80')
           }
           protocol: 'Http'
           sslCertificate: null
@@ -93,13 +91,13 @@ resource resApplicationGateway 'Microsoft.Network/applicationGateways@2020-11-01
         properties: {
           ruleType: 'Basic'
           httpListener: {
-            id: '${varAgwId}/httpListeners/myListener'
+            id: resourceId('Microsoft.Network/applicationGateways/httpListeners', paramAppGatewayName, 'myListener')
           }
           backendAddressPool: {
-            id: '${varAgwId}/backendAddressPools/myBackendPool'
+            id: resourceId('Microsoft.Network/applicationGateways/backendAddressPools', paramAppGatewayName, 'myBackendPool')
           }
           backendHttpSettings: {
-            id: '${varAgwId}/backendHttpSettingsCollection/myHTTPSetting'
+            id: resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', paramAppGatewayName, 'myHTTPSetting')
           }
         }
       }
