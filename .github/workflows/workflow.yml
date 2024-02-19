@@ -36,7 +36,7 @@ jobs:
       with:
         deploymentName: ${{ github.run_number }}
         resourceGroupName: ${{ env.AZURE_RESOURCEGROUP_NAME }}
-        template: ./deploy/main.bicep
+        template: ./main.bicep
         parameters: ./param.bicepparam
         deploymentMode: Validate
   deploy:
