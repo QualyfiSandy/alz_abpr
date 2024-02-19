@@ -56,8 +56,8 @@ jobs:
         failOnStdErr: false
         resourceGroupName: ${{ env.AZURE_RESOURCEGROUP_NAME }}
         template: ./main.bicep
-        parameters: >
-            environmentType=${{ env.ENVIRONMENT_TYPE }}
+        # parameters: >
+        #     environmentType=${{ env.ENVIRONMENT_TYPE }}
         additionalArguments: --what-if
   deploy:
     runs-on: ubuntu-latest
