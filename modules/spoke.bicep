@@ -200,6 +200,7 @@ resource resSpokeAppService 'Microsoft.Web/sites@2022-09-01' = {
   ]
   properties: {
     serverFarmId: resAppServicePlan.id
+    httpsOnly: true
     siteConfig: {
       linuxFxVersion: 'DOTNETCORE|7.0'
       appSettings: [
