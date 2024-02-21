@@ -28,15 +28,15 @@ module modHubVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.1' = 
         name: 'GatewaySubnet'
       }
       {
-        addressPrefix: '10.20.2.0/24'
+        addressPrefix: '10.10.2.0/24'
         name: 'appGWSubnet'
       }
       {
-        addressPrefix: '10.20.3.0/24'
+        addressPrefix: '10.10.3.0/24'
         name: 'azureFirewallSubnet'
       }
       {
-        addressPrefix: '10.20.4.0/24'
+        addressPrefix: '10.10.4.0/24'
         name: 'azureBastionSubnet'
       }
     ]
@@ -220,7 +220,7 @@ module modProdSpokeVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1
 }
 
 module modRouteTable 'br/public:avm/res/network/route-table:0.2.1' = {
-  name: 'Route Table'
+  name: 'Route-Table'
   params: {
     // Required parameters
     name: 'route-to-${paramlocation}-hub-fw'
@@ -240,7 +240,7 @@ module modRouteTable 'br/public:avm/res/network/route-table:0.2.1' = {
 }
 
 module modNetworkSecurityGroup 'br/public:avm/res/network/network-security-group:0.1.2' = {
-  name: 'Network Security Group'
+  name: 'Network-Security-Group'
   params: {
     // Required parameters
     name: 'NSG'
@@ -574,6 +574,174 @@ module modKeyVault 'br/public:avm/res/key-vault/vault:0.3.4' = {
   }
 }
 
+// App Service + Plan //
+
+module modDevAppServicePlan 'br/public:avm/res/web/serverfarm:0.1.0' = {
+  name: 'Dev-ASP'
+  params: {
+    name: 'asp-dev-${paramlocation}-001-12345'
+    sku: {
+      name: 'S1'
+    }
+    kind: 'Linux'
+    location: paramlocation
+  }
+}
+
+module modProdAppServicePlan 'br/public:avm/res/web/serverfarm:0.1.0' = {
+  name: 'Prod-ASP'
+  params: {
+    name: 'asp-prod-${paramlocation}-001-123456'
+    sku: {
+      name: 'S1'
+    }
+    kind: 'Linux'
+    location: paramlocation
+  }
+}
+
+module modDevAppService 'br/public:avm/res/web/site:0.2.0' = {
+  name: 'DevAppService'
+  params: {
+    kind: 'app'
+    name: 'as-dev-${paramlocation}-001-12345'
+    serverFarmResourceId: modDevAppServicePlan.outputs.resourceId
+    location: paramlocation
+    httpsOnly: true
+    siteConfig: {
+      metadata: [
+        {
+          name: 'Current_Stack'
+          value: 'DOTNETCORE|7.0'
+        }
+      ]
+    }
+    privateEndpoints: [
+      {
+        privateDnsZoneResourceIds: [
+          modAspPrivateDnsZone.outputs.resourceId
+        ]
+        subnetResourceId: modDevSpokeVirtualNetwork.outputs.subnetResourceIds[0]
+      }
+    ]
+  }
+}
+
+module modProdAppService 'br/public:avm/res/web/site:0.2.0' = {
+  name: 'ProdAppService'
+  params: {
+    kind: 'app'
+    name: 'as-prod-${paramlocation}-001-12345'
+    serverFarmResourceId: modDevAppServicePlan.outputs.resourceId
+    location: paramlocation
+    httpsOnly: true
+    siteConfig: {
+      metadata: [
+        {
+          name: 'Current_Stack'
+          value: 'DOTNETCORE|7.0'
+        }
+      ]
+    }
+    privateEndpoints: [
+      {
+        privateDnsZoneResourceIds: [
+          modAspPrivateDnsZone.outputs.resourceId
+        ]
+        subnetResourceId: modProdSpokeVirtualNetwork.outputs.subnetResourceIds[0]
+      }
+    ]
+  }
+}
+
+// LOG ANALYTICS WORKSPACE //
+
+module modLogAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0.3.1' = {
+  name: 'LogAnalyticsWorkspace'
+  params: {
+    // Required parameters
+    name: 'log-core-${paramlocation}-001-21020242'
+    // Non-required parameters
+    dailyQuotaGb: 10
+    dataSources: [
+      {
+        eventLogName: 'Application'
+        eventTypes: [
+          {
+            eventType: 'Error'
+          }
+          {
+            eventType: 'Warning'
+          }
+          {
+            eventType: 'Information'
+          }
+        ]
+        kind: 'WindowsEvent'
+        name: 'applicationEvent'
+      }
+      {
+        counterName: '% Processor Time'
+        instanceName: '*'
+        intervalSeconds: 60
+        kind: 'WindowsPerformanceCounter'
+        name: 'windowsPerfCounter1'
+        objectName: 'Processor'
+      }
+      {
+        kind: 'IISLogs'
+        name: 'sampleIISLog1'
+        state: 'OnPremiseEnabled'
+      }
+    ]
+    diagnosticSettings: [
+      {
+        eventHubAuthorizationRuleResourceId: '<eventHubAuthorizationRuleResourceId>'
+        eventHubName: '<eventHubName>'
+        storageAccountResourceId: '<storageAccountResourceId>'
+        workspaceResourceId: '<workspaceResourceId>'
+      }
+    ]
+    gallerySolutions: [
+      {
+        name: 'AzureAutomation'
+        product: 'OMSGallery'
+        publisher: 'Microsoft'
+      }
+    ]
+    linkedServices: [
+      {
+        name: 'Automation'
+        resourceId: '<resourceId>'
+      }
+    ]
+    linkedStorageAccounts: [
+      {
+        name: 'Query'
+        resourceId: '<resourceId>'
+      }
+    ]
+    location: '<location>'
+    managedIdentities: {
+      systemAssigned: true
+    }
+    publicNetworkAccessForIngestion: 'Disabled'
+    publicNetworkAccessForQuery: 'Disabled'
+    storageInsightsConfigs: [
+      {
+        storageAccountResourceId: '<storageAccountResourceId>'
+        tables: [
+          'LinuxsyslogVer2v0'
+          'WADETWEventTable'
+          'WADServiceFabric*EventTable'
+          'WADWindowsEventLogsTable'
+        ]
+      }
+    ]
+    useResourcePermissions: true
+  }
+}
+
 /////////////// OLD PROJECT BELOW HERE \\\\\\\\\\\\\
 
 // PRIVATE DNS ZONE MODULES
@@ -625,13 +793,13 @@ module modAgw 'modules/appgw.bicep' = {
     }
   }
 
-// ROUTE TABLE MODULE
-module modRoutes 'modules/routetable.bicep' = {
-  name: 'routetable'
-  params: {
-    paramlocation: paramlocation
-  }
-}
+// // ROUTE TABLE MODULE
+// module modRoutes 'modules/routetable.bicep' = {
+//   name: 'routetable'
+//   params: {
+//     paramlocation: paramlocation
+//   }
+// }
 
 // HUB MODULE
 // module modHub 'modules/hub.bicep' = {
@@ -654,7 +822,7 @@ module modCore 'modules/core.bicep' = {
     paramlocation: paramlocation
     VMusername: resKeyVault.getSecret('VMusername')
     VMpassword: resKeyVault.getSecret('VMpassword')
-    resRouteTable: modRoutes.outputs.outRouteToAfw
+    resRouteTable: modRouteTable.name
     keyVaultCoreObjectId: keyVaultObjectId
     osType: 'windows'
     storageUri: modProd.outputs.outStorageAccountEndpoint
@@ -673,7 +841,7 @@ module modDev 'modules/spoke.bicep' = {
   name: 'dev-${paramlocation}-001'
   params: {
     paramlocation: paramlocation
-    resRouteTable: modRoutes.outputs.outRouteToAfw
+    resRouteTable: modRouteTable.name
     paramAppSubnetAddressPrefix: '10.30.1.0/24'
     paramSqlSubnetAddressPrefix: '10.30.2.0/24'
     paramStSubnetAddressPrefix: '10.30.3.0/24'
@@ -713,7 +881,7 @@ module modProd 'modules/spoke.bicep' = {
   name: 'prod-${paramlocation}-001'
   params: {
     paramlocation: paramlocation
-    resRouteTable: modRoutes.outputs.outRouteToAfw
+    resRouteTable: modRouteTable.name
     paramAppSubnetAddressPrefix: '10.31.1.0/24'
     paramSqlSubnetAddressPrefix: '10.31.2.0/24'
     paramStSubnetAddressPrefix: '10.31.3.0/24'
