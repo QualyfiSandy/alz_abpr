@@ -1,9 +1,9 @@
-param paramLogAnalyticsName string = 'log-core-${paramlocation}-001-123'
-param paramAppInsightsName string = 'appinsights-001'
+// param paramLogAnalyticsName string = 'log-core-${paramlocation}-001-123'
+// param paramAppInsightsName string = 'appinsights-001'
 
-param keyVaultObjectId string
-param keyVaultName string
-param randNumb string
+// param keyVaultObjectId string
+// param keyVaultName string
+// param randNumb string
 param paramlocation string
 
 var varSqlEndpoint = 'privatelink${environment().suffixes.sqlServerHostname}'
@@ -158,12 +158,10 @@ module modDevSpokeVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.
 module modProdSpokeVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.1' = {
   name: 'ProdVirtualNetwork'
   params: {
-    // Required parameters
     addressPrefixes: [
       '10.31.0.0/16'
     ]
     name: 'prod-${paramlocation}-001'
-    // Non-required parameters
     location: paramlocation
     peerings: [
       {
@@ -412,7 +410,7 @@ module modVirtualNetworkGateway 'br/public:avm/res/network/virtual-network-gatew
     vNetResourceId: modHubVirtualNetwork.outputs.resourceId
     // Non-required parameters
     activeActive: true
-    enablePrivateIpAddress: true
+    enablePrivateIpAddress: false
     location: paramlocation
     vpnGatewayGeneration: 'Generation1'
     vpnType: 'RouteBased'
@@ -421,8 +419,8 @@ module modVirtualNetworkGateway 'br/public:avm/res/network/virtual-network-gatew
 
 // VM //
 
-module virtualMachine 'br/public:avm/res/compute/virtual-machine:0.2.1' = {
-  name: 'Core Virtual Machine'
+module modCoreVirtualMachine 'br/public:avm/res/compute/virtual-machine:0.2.1' = {
+  name: 'CoreVirtualMachine'
   params: {
     // Required parameters
     adminUsername: 'VMAdmin2'
@@ -545,7 +543,7 @@ module virtualMachine 'br/public:avm/res/compute/virtual-machine:0.2.1' = {
 // CORE KEYVAULT //
 
 module modKeyVault 'br/public:avm/res/key-vault/vault:0.3.4' = {
-  name: 'Core Key Vault'
+  name: 'CoreKeyVault'
   params: {
     name: 'kv-encrypt-core-21022024'
     enablePurgeProtection: false
@@ -656,6 +654,18 @@ module modProdAppService 'br/public:avm/res/web/site:0.2.0' = {
   }
 }
 
+module modAppInsights 'br/public:avm/res/insights/component:0.2.0' = {
+  name: 'appInsights'
+  params: {
+    // Required parameters
+    name: 'App Insights'
+    workspaceResourceId: modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceId
+    // Non-required parameters
+    location: paramlocation
+    kind: 'web'
+  }
+}
+
 // LOG ANALYTICS WORKSPACE //
 
 module modLogAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0.3.1' = {
@@ -744,36 +754,144 @@ module modLogAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspac
   }
 }
 
+// SQL SERVER //
+
+module modProdSqlServer 'br/public:avm/res/sql/server:0.1.5' = {
+  name: 'ProdSQLServer'
+  params: {
+    // Required parameters
+    name: 'sql-prod-${paramlocation}-001-21022024'
+    // Non-required parameters
+    administratorLogin: 'adminUserName'
+    administratorLoginPassword: '<administratorLoginPassword>'
+    location: paramlocation
+    databases: [
+      {
+        skuName: 'Basic'
+        skuTier: 'Basic'
+      }
+    ]
+    privateEndpoints: [
+      {
+        privateDnsZoneResourceIds: [
+          modSqlPrivateDnsZone.outputs.resourceId
+        ]
+        subnetResourceId: modProdSpokeVirtualNetwork.outputs.subnetResourceIds[1]
+      }
+    ]
+  }
+}
+
+module modDevSqlServer 'br/public:avm/res/sql/server:0.1.5' = {
+  name: 'DevSQLServer'
+  params: {
+    // Required parameters
+    name: 'sql-dev-${paramlocation}-001-210220242'
+    // Non-required parameters
+    administratorLogin: 'adminUserName'
+    administratorLoginPassword: '<administratorLoginPassword>'
+    location: paramlocation
+    databases: [
+      {
+        skuName: 'Basic'
+        skuTier: 'Basic'
+      }
+    ]
+    privateEndpoints: [
+      {
+        privateDnsZoneResourceIds: [
+          modSqlPrivateDnsZone.outputs.resourceId
+        ]
+        subnetResourceId: modDevSpokeVirtualNetwork.outputs.subnetResourceIds[1]
+      }
+    ]
+  }
+}
+
+module modProdStorageAccount 'br/public:avm/res/storage/storage-account:0.6.2' = {
+  name: 'ProdStorageAccount'
+  params: {
+    // Required parameters
+    name: 'stprod00121022024'
+    // Non-required parameters
+    kind: 'StorageV2'
+    skuName: 'Standard_LRS'
+    location: paramlocation
+    privateEndpoints: [
+      {
+        privateDnsZoneResourceIds: [
+          modStPrivateDnsZone.outputs.resourceId
+        ]
+        service: 'blob'
+        subnetResourceId: modProdSpokeVirtualNetwork.outputs.subnetResourceIds[2]
+      }
+    ]
+  }
+}
+
+module modDevStorageAccount 'br/public:avm/res/storage/storage-account:0.6.2' = {
+  name: 'DevStorageAccount'
+  params: {
+    // Required parameters
+    name: 'stdev00121022024'
+    // Non-required parameters
+    kind: 'StorageV2'
+    skuName: 'Standard_LRS'
+    location: paramlocation
+    privateEndpoints: [
+      {
+        privateDnsZoneResourceIds: [
+          modStPrivateDnsZone.outputs.resourceId
+        ]
+        service: 'blob'
+        subnetResourceId: modDevSpokeVirtualNetwork.outputs.subnetResourceIds[2]
+      }
+    ]
+  }
+}
+
+// <--- SOURCE CONTROL RESOURCE ---> //
+
+// resource resProdSrcControls 'Microsoft.Web/sites/sourcecontrols@2022-09-01' = {
+//   parent: resSpokeAppService
+//   name: 'web'
+//   properties: {
+//     repoUrl: 'https://github.com/Azure-Samples/dotnetcore-docs-hello-world'
+//     branch: 'master'
+//     isManualIntegration: true
+//       }
+//     }
+
 /////////////// OLD PROJECT BELOW HERE \\\\\\\\\\\\\
 
 // PRIVATE DNS ZONE MODULES
-module modPrivateDnsZoneKeyVault 'modules/privatednszone.bicep' = {
-  name: 'keyvault-privatednszone'
-  params: {
-    paramPrivateDnsZoneName: varKeyVaultEndpoint
-  }
-}
+// module modPrivateDnsZoneKeyVault 'modules/privatednszone.bicep' = {
+//   name: 'keyvault-privatednszone'
+//   params: {
+//     paramPrivateDnsZoneName: varKeyVaultEndpoint
+//   }
+// }
 
-module modPrivateDnsZoneSQL 'modules/privatednszone.bicep' = {
-  name: 'sql-privatednszone'
-  params: {
-    paramPrivateDnsZoneName: varSqlEndpoint
-  }
-}
+// module modPrivateDnsZoneSQL 'modules/privatednszone.bicep' = {
+//   name: 'sql-privatednszone'
+//   params: {
+//     paramPrivateDnsZoneName: varSqlEndpoint
+//   }
+// }
 
-module modPrivateDnsZoneSt 'modules/privatednszone.bicep' = {
-  name: 'storageaccount-privatednszone'
-  params: {
-    paramPrivateDnsZoneName: varStEndpoint
-  }
-}
+// module modPrivateDnsZoneSt 'modules/privatednszone.bicep' = {
+//   name: 'storageaccount-privatednszone'
+//   params: {
+//     paramPrivateDnsZoneName: varStEndpoint
+//   }
+// }
 
-module modPrivateDnsZoneAsp 'modules/privatednszone.bicep' = {
-    name: 'appserviceplan-privatednszone'
-    params: {
-      paramPrivateDnsZoneName: 'privatelink.azurewebsites.net'
-    }
-  }
+// module modPrivateDnsZoneAsp 'modules/privatednszone.bicep' = {
+//     name: 'appserviceplan-privatednszone'
+//     params: {
+//       paramPrivateDnsZoneName: 'privatelink.azurewebsites.net'
+//     }
+//   }
 
 // APPLICATION GATEWAY MODULE
 module modAgw 'modules/appgw.bicep' = {
@@ -782,18 +900,18 @@ module modAgw 'modules/appgw.bicep' = {
       paramAppGatewayName: 'agw-hub-${paramlocation}-001'
       paramlocation: paramlocation
       paramAgwSubnetId: modHubVirtualNetwork.outputs.subnetResourceIds[1]
-      paramProdFqdn: modProd.outputs.outProdFqdn
+      paramProdFqdn: modProdAppService.outputs.defaultHostname
     }
   }
 
-// LOG ANALYTICS MODULE
-  module modLogAnalytics 'modules/loganalytics.bicep' = {
-    name: 'loganalytics'
-    params: {
-      paramLogAnalyticsName: paramLogAnalyticsName
-      paramlocation: paramlocation
-    }
-  }
+// // LOG ANALYTICS MODULE
+//   module modLogAnalytics 'modules/loganalytics.bicep' = {
+//     name: 'loganalytics'
+//     params: {
+//       paramLogAnalyticsName: paramLogAnalyticsName
+//       paramlocation: paramlocation
+//     }
+//   }
 
 // // ROUTE TABLE MODULE
 // module modRoutes 'modules/routetable.bicep' = {
@@ -818,105 +936,105 @@ module modAgw 'modules/appgw.bicep' = {
 // }
 
 // CORE MODULE
-module modCore 'modules/core.bicep' = {
-  name: 'core-${paramlocation}-001'
-  params: {
-    paramlocation: paramlocation
-    VMusername: resKeyVault.getSecret('VMusername')
-    VMpassword: resKeyVault.getSecret('VMpassword')
-    resRouteTable: modRouteTable.name
-    keyVaultCoreObjectId: keyVaultObjectId
-    osType: 'windows'
-    storageUri: modProd.outputs.outStorageAccountEndpoint
-    paramKeyVaultPrivateDnsZoneName: modPrivateDnsZoneKeyVault.outputs.outPrivateDnsZoneName
-    paramStPrivateDnsZoneName: modPrivateDnsZoneSt.outputs.outPrivateDnsZoneName
-    privateAspDnsZoneName: modPrivateDnsZoneAsp.outputs.outPrivateDnsZoneName
-    SqlDbPrivateDnsZoneName: modPrivateDnsZoneSQL.outputs.outPrivateDnsZoneName
-    paramKeyVaultPrivateDnsZoneId: modPrivateDnsZoneKeyVault.outputs.outPrivateDnsZoneId
-    paramKeyVaultEndpointName: 'kvendpointname'
-    paramWorkspaceId: modLogAnalytics.outputs.logAnalyticsId
-  }
-}
+// module modCore 'modules/core.bicep' = {
+//   name: 'core-${paramlocation}-001'
+//   params: {
+//     paramlocation: paramlocation
+//     VMusername: resKeyVault.getSecret('VMusername')
+//     VMpassword: resKeyVault.getSecret('VMpassword')
+//     resRouteTable: modRouteTable.name
+//     keyVaultCoreObjectId: keyVaultObjectId
+//     osType: 'windows'
+//     storageUri: modProd.outputs.outStorageAccountEndpoint
+//     paramKeyVaultPrivateDnsZoneName: modPrivateDnsZoneKeyVault.outputs.outPrivateDnsZoneName
+//     paramStPrivateDnsZoneName: modPrivateDnsZoneSt.outputs.outPrivateDnsZoneName
+//     privateAspDnsZoneName: modPrivateDnsZoneAsp.outputs.outPrivateDnsZoneName
+//     SqlDbPrivateDnsZoneName: modPrivateDnsZoneSQL.outputs.outPrivateDnsZoneName
+//     paramKeyVaultPrivateDnsZoneId: modPrivateDnsZoneKeyVault.outputs.outPrivateDnsZoneId
+//     paramKeyVaultEndpointName: 'kvendpointname'
+//     paramWorkspaceId: modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceId
+//   }
+// }
 
 // DEV SPOKE MODULE
-module modDev 'modules/spoke.bicep' = {
-  name: 'dev-${paramlocation}-001'
-  params: {
-    paramlocation: paramlocation
-    resRouteTable: modRouteTable.name
-    paramAppSubnetAddressPrefix: '10.30.1.0/24'
-    paramSqlSubnetAddressPrefix: '10.30.2.0/24'
-    paramStSubnetAddressPrefix: '10.30.3.0/24'
-    paramVnetAddressPrefix: '10.30.0.0/16'
-    paramVnetName: 'vnet-dev-${paramlocation}-001'
-    paramAspName: 'asp-dev-${paramlocation}-001-${uniqueString(resourceGroup().id)}'
-    paramAppServiceName: 'as-dev-${paramlocation}-001-${uniqueString(resourceGroup().id)}'
-    paramAppSubnetName: 'devAppServiceSubnet'
-    paramSqlSubnetName: 'devSqlSubnet'
-    paramStSubnetName: 'devStorageSubnet'
-    paramAspNsgName: 'dev-asp-nsg'
-    paramSqlNsgName: 'dev-sql-nsg'
-    paramStNsgName: 'dev-st-nsg'
-    paramSqlServerDatabaseName: 'sqldb-dev-${paramlocation}-001'
-    paramSqlServerName: 'sql-dev-${paramlocation}-001-${randNumb}'
-    paramSqlUsername: resKeyVault.getSecret('SQLdevusername')
-    paramSqlPassword: resKeyVault.getSecret('SQLpassworddev')
-    privateAspDnsZoneName: modPrivateDnsZoneAsp.outputs.outPrivateDnsZoneName
-    SqlDbPrivateDnsZoneName: varSqlEndpoint
-    paramAspPrivateEndpointName: 'aspDevPrivEndPoint'
-    paramSqlDbPrivateEndpointName: 'sqlDevPrivEndPoint'
-    paramStorageAccount: 'stdev${randNumb}'
-    paramStPrivateDnsZoneName: modPrivateDnsZoneSt.outputs.outPrivateDnsZoneName
-    paramStPrivateDnsZoneId: modPrivateDnsZoneSt.outputs.outPrivateDnsZoneId
-    paramAspPrivateDnsZoneId: modPrivateDnsZoneAsp.outputs.outPrivateDnsZoneId
-    paramSqlPrivateDnsZoneId: modPrivateDnsZoneSQL.outputs.outPrivateDnsZoneId
-    paramStPrivateEndpointName: 'stendpoint-dev-${paramlocation}-001'
-    paramAppInsightName: paramAppInsightsName
-    appName: 'app'
-    paramKeyVaultPrivateDnsZoneName: modPrivateDnsZoneKeyVault.outputs.outPrivateDnsZoneName
-    paramDept: 'Development'
-  }
-}
+// module modDev 'modules/spoke.bicep' = {
+//   name: 'dev-${paramlocation}-001'
+//   params: {
+//     paramlocation: paramlocation
+//     resRouteTable: modRouteTable.name
+//     paramAppSubnetAddressPrefix: '10.30.1.0/24'
+//     paramSqlSubnetAddressPrefix: '10.30.2.0/24'
+//     paramStSubnetAddressPrefix: '10.30.3.0/24'
+//     paramVnetAddressPrefix: '10.30.0.0/16'
+//     paramVnetName: 'vnet-dev-${paramlocation}-001'
+//     paramAspName: 'asp-dev-${paramlocation}-001-${uniqueString(resourceGroup().id)}'
+//     paramAppServiceName: 'as-dev-${paramlocation}-001-${uniqueString(resourceGroup().id)}'
+//     paramAppSubnetName: 'devAppServiceSubnet'
+//     paramSqlSubnetName: 'devSqlSubnet'
+//     paramStSubnetName: 'devStorageSubnet'
+//     paramAspNsgName: 'dev-asp-nsg'
+//     paramSqlNsgName: 'dev-sql-nsg'
+//     paramStNsgName: 'dev-st-nsg'
+//     paramSqlServerDatabaseName: 'sqldb-dev-${paramlocation}-001'
+//     paramSqlServerName: 'sql-dev-${paramlocation}-001-${randNumb}'
+//     paramSqlUsername: resKeyVault.getSecret('SQLdevusername')
+//     paramSqlPassword: resKeyVault.getSecret('SQLpassworddev')
+//     privateAspDnsZoneName: modPrivateDnsZoneAsp.outputs.outPrivateDnsZoneName
+//     SqlDbPrivateDnsZoneName: varSqlEndpoint
+//     paramAspPrivateEndpointName: 'aspDevPrivEndPoint'
+//     paramSqlDbPrivateEndpointName: 'sqlDevPrivEndPoint'
+//     paramStorageAccount: 'stdev${randNumb}'
+//     paramStPrivateDnsZoneName: modPrivateDnsZoneSt.outputs.outPrivateDnsZoneName
+//     paramStPrivateDnsZoneId: modPrivateDnsZoneSt.outputs.outPrivateDnsZoneId
+//     paramAspPrivateDnsZoneId: modPrivateDnsZoneAsp.outputs.outPrivateDnsZoneId
+//     paramSqlPrivateDnsZoneId: modPrivateDnsZoneSQL.outputs.outPrivateDnsZoneId
+//     paramStPrivateEndpointName: 'stendpoint-dev-${paramlocation}-001'
+//     paramAppInsightName: paramAppInsightsName
+//     appName: 'app'
+//     paramKeyVaultPrivateDnsZoneName: modPrivateDnsZoneKeyVault.outputs.outPrivateDnsZoneName
+//     paramDept: 'Development'
+//   }
+// }
 
-// PROD SPOKE MODULE
-module modProd 'modules/spoke.bicep' = {
-  name: 'prod-${paramlocation}-001'
-  params: {
-    paramlocation: paramlocation
-    resRouteTable: modRouteTable.name
-    paramAppSubnetAddressPrefix: '10.31.1.0/24'
-    paramSqlSubnetAddressPrefix: '10.31.2.0/24'
-    paramStSubnetAddressPrefix: '10.31.3.0/24'
-    paramVnetAddressPrefix: '10.31.0.0/16'
-    paramVnetName: 'vnet-prod-${paramlocation}-001'
-    paramAspName: 'asp-prod-${paramlocation}-001-${uniqueString(resourceGroup().id)}'
-    paramAppServiceName: 'as-prod-${paramlocation}-001-${uniqueString(resourceGroup().id)}'
-    paramAppSubnetName: 'prodAppServiceSubnet'
-    paramSqlSubnetName: 'prodSqlSubnet'
-    paramStSubnetName: 'prodStorageSubnet'
-    paramAspNsgName: 'prod-asp-nsg'
-    paramSqlNsgName: 'prod-sql-nsg'
-    paramStNsgName: 'prod-st-nsg'
-    paramSqlServerDatabaseName: 'sqldb-prod-${paramlocation}-001'
-    paramSqlServerName: 'sql-prod-${paramlocation}-001-${randNumb}'
-    paramSqlUsername: resKeyVault.getSecret('SQLdevusername')
-    paramSqlPassword: resKeyVault.getSecret('SQLpasswordprod')
-    privateAspDnsZoneName: modPrivateDnsZoneAsp.outputs.outPrivateDnsZoneName
-    SqlDbPrivateDnsZoneName: varSqlEndpoint
-    paramAspPrivateEndpointName: 'aspProdPrivEndPoint'
-    paramSqlDbPrivateEndpointName: 'sqlProdPrivEndPoint'
-    paramStorageAccount: 'stprod${randNumb}'
-    paramStPrivateDnsZoneName: modPrivateDnsZoneSt.outputs.outPrivateDnsZoneName
-    paramStPrivateDnsZoneId: modPrivateDnsZoneSt.outputs.outPrivateDnsZoneId
-    paramAspPrivateDnsZoneId: modPrivateDnsZoneAsp.outputs.outPrivateDnsZoneId
-    paramStPrivateEndpointName: 'stendpoint-prod-${paramlocation}-001'
-    paramAppInsightName: paramAppInsightsName
-    appName: 'app'
-    paramKeyVaultPrivateDnsZoneName: modPrivateDnsZoneKeyVault.outputs.outPrivateDnsZoneName
-    paramSqlPrivateDnsZoneId: modPrivateDnsZoneSQL.outputs.outPrivateDnsZoneId
-    paramDept: 'Production'
-  }
-}
+// // PROD SPOKE MODULE
+// module modProd 'modules/spoke.bicep' = {
+//   name: 'prod-${paramlocation}-001'
+//   params: {
+//     paramlocation: paramlocation
+//     resRouteTable: modRouteTable.name
+//     paramAppSubnetAddressPrefix: '10.31.1.0/24'
+//     paramSqlSubnetAddressPrefix: '10.31.2.0/24'
+//     paramStSubnetAddressPrefix: '10.31.3.0/24'
+//     paramVnetAddressPrefix: '10.31.0.0/16'
+//     paramVnetName: 'vnet-prod-${paramlocation}-001'
+//     paramAspName: 'asp-prod-${paramlocation}-001-${uniqueString(resourceGroup().id)}'
+//     paramAppServiceName: 'as-prod-${paramlocation}-001-${uniqueString(resourceGroup().id)}'
+//     paramAppSubnetName: 'prodAppServiceSubnet'
+//     paramSqlSubnetName: 'prodSqlSubnet'
+//     paramStSubnetName: 'prodStorageSubnet'
+//     paramAspNsgName: 'prod-asp-nsg'
+//     paramSqlNsgName: 'prod-sql-nsg'
+//     paramStNsgName: 'prod-st-nsg'
+//     paramSqlServerDatabaseName: 'sqldb-prod-${paramlocation}-001'
+//     paramSqlServerName: 'sql-prod-${paramlocation}-001-${randNumb}'
+//     paramSqlUsername: resKeyVault.getSecret('SQLdevusername')
+//     paramSqlPassword: resKeyVault.getSecret('SQLpasswordprod')
+//     privateAspDnsZoneName: modPrivateDnsZoneAsp.outputs.outPrivateDnsZoneName
+//     SqlDbPrivateDnsZoneName: varSqlEndpoint
+//     paramAspPrivateEndpointName: 'aspProdPrivEndPoint'
+//     paramSqlDbPrivateEndpointName: 'sqlProdPrivEndPoint'
+//     paramStorageAccount: 'stprod${randNumb}'
+//     paramStPrivateDnsZoneName: modPrivateDnsZoneSt.outputs.outPrivateDnsZoneName
+//     paramStPrivateDnsZoneId: modPrivateDnsZoneSt.outputs.outPrivateDnsZoneId
+//     paramAspPrivateDnsZoneId: modPrivateDnsZoneAsp.outputs.outPrivateDnsZoneId
+//     paramStPrivateEndpointName: 'stendpoint-prod-${paramlocation}-001'
+//     paramAppInsightName: paramAppInsightsName
+//     appName: 'app'
+//     paramKeyVaultPrivateDnsZoneName: modPrivateDnsZoneKeyVault.outputs.outPrivateDnsZoneName
+//     paramSqlPrivateDnsZoneId: modPrivateDnsZoneSQL.outputs.outPrivateDnsZoneId
+//     paramDept: 'Production'
+//   }
+// }
 
 // RSV MODULE
 module modRecoveryVault 'modules/recoveryvault.bicep' = {
@@ -926,11 +1044,11 @@ module modRecoveryVault 'modules/recoveryvault.bicep' = {
     vaultStorageType: 'GeoRedundant'
     enableCRR: true
     paramlocation: paramlocation
-    paramSourceResourceId: modCore.outputs.outVmId
-    paramVMName: modCore.outputs.outVmName
+    paramSourceResourceId: modCoreVirtualMachine.outputs.resourceId
+    paramVMName: modCoreVirtualMachine.name
   }
 }
 
-resource resKeyVault 'Microsoft.KeyVault/vaults@2019-09-01' existing = {
-  name: keyVaultName
-}
+// resource resKeyVault 'Microsoft.KeyVault/vaults@2019-09-01' existing = {
+//   name: keyVaultName
+// }
