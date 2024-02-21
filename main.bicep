@@ -582,6 +582,7 @@ module modDevAppServicePlan 'br/public:avm/res/web/serverfarm:0.1.0' = {
     name: 'asp-dev-${paramlocation}-001-12345'
     sku: {
       name: 'S1'
+      tier: 'Standard'
     }
     kind: 'Linux'
     location: paramlocation
@@ -594,6 +595,7 @@ module modProdAppServicePlan 'br/public:avm/res/web/serverfarm:0.1.0' = {
     name: 'asp-prod-${paramlocation}-001-123456'
     sku: {
       name: 'S1'
+      tier: 'Standard'
     }
     kind: 'Linux'
     location: paramlocation
@@ -721,7 +723,7 @@ module modLogAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspac
         resourceId: '<resourceId>'
       }
     ]
-    location: '<location>'
+    location: paramlocation
     managedIdentities: {
       systemAssigned: true
     }
