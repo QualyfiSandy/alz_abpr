@@ -860,7 +860,7 @@ module modDev 'modules/spoke.bicep' = {
     paramSqlServerDatabaseName: 'sqldb-dev-${paramlocation}-001'
     paramSqlServerName: 'sql-dev-${paramlocation}-001-${randNumb}'
     paramSqlUsername: resKeyVault.getSecret('SQLdevusername')
-    paramSqlPassword: resKeyVault.getSecret('SQLdevpassword')
+    paramSqlPassword: resKeyVault.getSecret('SQLpassworddev')
     privateAspDnsZoneName: modPrivateDnsZoneAsp.outputs.outPrivateDnsZoneName
     SqlDbPrivateDnsZoneName: varSqlEndpoint
     paramAspPrivateEndpointName: 'aspDevPrivEndPoint'
@@ -900,7 +900,7 @@ module modProd 'modules/spoke.bicep' = {
     paramSqlServerDatabaseName: 'sqldb-prod-${paramlocation}-001'
     paramSqlServerName: 'sql-prod-${paramlocation}-001-${randNumb}'
     paramSqlUsername: resKeyVault.getSecret('SQLdevusername')
-    paramSqlPassword: resKeyVault.getSecret('SQLprodpassword')
+    paramSqlPassword: resKeyVault.getSecret('SQLpasswordprod')
     privateAspDnsZoneName: modPrivateDnsZoneAsp.outputs.outPrivateDnsZoneName
     SqlDbPrivateDnsZoneName: varSqlEndpoint
     paramAspPrivateEndpointName: 'aspProdPrivEndPoint'
