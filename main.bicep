@@ -425,7 +425,7 @@ module virtualMachine 'br/public:avm/res/compute/virtual-machine:0.2.1' = {
   name: 'Core Virtual Machine'
   params: {
     // Required parameters
-    adminUsername: 'VMAdmin'
+    adminUsername: 'VMAdmin2'
     imageReference: {
       offer: 'WindowsServer'
       publisher: 'MicrosoftWindowsServer'
