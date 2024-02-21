@@ -74,7 +74,7 @@ module modCoreVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.1' =
           id: modNetworkSecurityGroup
         }
         routeTable: {
-          id: modRouteTable
+          id: modRouteTable.outputs.resourceId
         }
       }
       {
@@ -84,7 +84,7 @@ module modCoreVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.1' =
           id: modNetworkSecurityGroup
         }
         routeTable: {
-          id: modRouteTable
+          id: modRouteTable.outputs.resourceId
         }
       }
     ]
@@ -96,7 +96,7 @@ module modDevSpokeVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.
   params: {
     // Required parameters
     addressPrefixes: [
-      '10.20.0.0/16'
+      '10.30.0.0/16'
     ]
     name: 'dev-${paramlocation}-001'
     // Non-required parameters
@@ -123,7 +123,7 @@ module modDevSpokeVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.
             id: modNetworkSecurityGroup
           }
           routeTable: {
-            id: modRouteTable
+            id: modRouteTable.outputs.resourceId
           }
         }
       }
@@ -135,7 +135,7 @@ module modDevSpokeVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.
             id: modNetworkSecurityGroup
           }
           routeTable: {
-            id: modRouteTable
+            id: modRouteTable.outputs.resourceId
           }
         }
       }
@@ -147,7 +147,7 @@ module modDevSpokeVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.
             id: modNetworkSecurityGroup
           }
           routeTable: {
-            id: modRouteTable
+            id: modRouteTable.outputs.resourceId
           }
         }
       }
@@ -160,7 +160,7 @@ module modProdSpokeVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1
   params: {
     // Required parameters
     addressPrefixes: [
-      '10.20.0.0/16'
+      '10.31.0.0/16'
     ]
     name: 'prod-${paramlocation}-001'
     // Non-required parameters
@@ -187,7 +187,7 @@ module modProdSpokeVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1
             id: modNetworkSecurityGroup
           }
           routeTable: {
-            id: modRouteTable
+            id: modRouteTable.outputs.resourceId
           }
         }
       }
@@ -199,7 +199,7 @@ module modProdSpokeVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1
             id: modNetworkSecurityGroup
           }
           routeTable: {
-            id: modRouteTable
+            id: modRouteTable.outputs.resourceId
           }
         }
       }
@@ -211,7 +211,7 @@ module modProdSpokeVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1
             id: modNetworkSecurityGroup
           }
           routeTable: {
-            id: modRouteTable
+            id: modRouteTable.outputs.resourceId
           }
         }
       }
@@ -403,7 +403,7 @@ module modBastionHost 'br/public:avm/res/network/bastion-host:0.1.1' = {
 // VPN Gateway //
 
 module modVirtualNetworkGateway 'br/public:avm/res/network/virtual-network-gateway:0.1.0' = {
-  name: 'VPN Gateway'
+  name: 'VPN-Gateway'
   params: {
     // Required parameters
     gatewayType: 'Vpn'
