@@ -779,8 +779,9 @@ module modDevStorageAccount 'br/public:avm/res/storage/storage-account:0.6.2' = 
 
 module modsrcctrl 'srcctrl.bicep' = {
   name: 'src-control'
+  // dependsOn: [modDevAppService]
   params: {
-    paramsrcctrlname: 'as-dev-${paramlocation}-001-12345/web'
+    paramsrcctrlname: '${modDevAppService.outputs.name}/web'
   }
 }
 
