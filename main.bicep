@@ -275,19 +275,19 @@ module modSqlPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' =
     virtualNetworkLinks: [
       {
         registrationEnabled: true
-        virtualNetworkResourceId: modHubVirtualNetwork
+        virtualNetworkResourceId: modHubVirtualNetwork.outputs.resourceId
       }
       {
         registrationEnabled: true
-        virtualNetworkResourceId: modCoreVirtualNetwork
+        virtualNetworkResourceId: modCoreVirtualNetwork.outputs.resourceId
       }
       {
         registrationEnabled: true
-        virtualNetworkResourceId: modProdSpokeVirtualNetwork
+        virtualNetworkResourceId: modProdSpokeVirtualNetwork.outputs.resourceId
       }
       {
         registrationEnabled: true
-        virtualNetworkResourceId: modDevSpokeVirtualNetwork
+        virtualNetworkResourceId: modDevSpokeVirtualNetwork.outputs.resourceId
       }
     ]
   }
@@ -303,19 +303,19 @@ module modStPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' = 
     virtualNetworkLinks: [
       {
         registrationEnabled: true
-        virtualNetworkResourceId: modHubVirtualNetwork
+        virtualNetworkResourceId: modHubVirtualNetwork.outputs.resourceId
       }
       {
         registrationEnabled: true
-        virtualNetworkResourceId: modCoreVirtualNetwork
+        virtualNetworkResourceId: modCoreVirtualNetwork.outputs.resourceId
       }
       {
         registrationEnabled: true
-        virtualNetworkResourceId: modProdSpokeVirtualNetwork
+        virtualNetworkResourceId: modProdSpokeVirtualNetwork.outputs.resourceId
       }
       {
         registrationEnabled: true
-        virtualNetworkResourceId: modDevSpokeVirtualNetwork
+        virtualNetworkResourceId: modDevSpokeVirtualNetwork.outputs.resourceId
       }
     ]
   }
@@ -331,19 +331,19 @@ module modKvPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' = 
     virtualNetworkLinks: [
       {
         registrationEnabled: true
-        virtualNetworkResourceId: modHubVirtualNetwork
+        virtualNetworkResourceId: modHubVirtualNetwork.outputs.resourceId
       }
       {
         registrationEnabled: true
-        virtualNetworkResourceId: modCoreVirtualNetwork
+        virtualNetworkResourceId: modCoreVirtualNetwork.outputs.resourceId
       }
       {
         registrationEnabled: true
-        virtualNetworkResourceId: modProdSpokeVirtualNetwork
+        virtualNetworkResourceId: modProdSpokeVirtualNetwork.outputs.resourceId
       }
       {
         registrationEnabled: true
-        virtualNetworkResourceId: modDevSpokeVirtualNetwork
+        virtualNetworkResourceId: modDevSpokeVirtualNetwork.outputs.resourceId
       }
     ]
   }
@@ -359,19 +359,19 @@ module modAspPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' =
     virtualNetworkLinks: [
       {
         registrationEnabled: true
-        virtualNetworkResourceId: modHubVirtualNetwork
+        virtualNetworkResourceId: modHubVirtualNetwork.outputs.resourceId
       }
       {
         registrationEnabled: true
-        virtualNetworkResourceId: modCoreVirtualNetwork
+        virtualNetworkResourceId: modCoreVirtualNetwork.outputs.resourceId
       }
       {
         registrationEnabled: true
-        virtualNetworkResourceId: modProdSpokeVirtualNetwork
+        virtualNetworkResourceId: modProdSpokeVirtualNetwork.outputs.resourceId
       }
       {
         registrationEnabled: true
-        virtualNetworkResourceId: modDevSpokeVirtualNetwork
+        virtualNetworkResourceId: modDevSpokeVirtualNetwork.outputs.resourceId
       }
     ]
   }
@@ -559,7 +559,7 @@ module modKeyVault 'br/public:avm/res/key-vault/vault:0.3.4' = {
             properties: {
               groupId: 'vault'
               memberName: 'default'
-              privateIPAddress: '10.0.0.10'
+              privateIPAddress: ''
             }
           }
         ]
@@ -706,14 +706,6 @@ module modLogAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspac
         state: 'OnPremiseEnabled'
       }
     ]
-    diagnosticSettings: [
-      {
-        eventHubAuthorizationRuleResourceId: '<eventHubAuthorizationRuleResourceId>'
-        eventHubName: '<eventHubName>'
-        storageAccountResourceId: '<storageAccountResourceId>'
-        workspaceResourceId: '<workspaceResourceId>'
-      }
-    ]
     gallerySolutions: [
       {
         name: 'AzureAutomation'
@@ -721,35 +713,12 @@ module modLogAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspac
         publisher: 'Microsoft'
       }
     ]
-    linkedServices: [
-      {
-        name: 'Automation'
-        resourceId: '<resourceId>'
-      }
-    ]
-    linkedStorageAccounts: [
-      {
-        name: 'Query'
-        resourceId: '<resourceId>'
-      }
-    ]
     location: paramlocation
     managedIdentities: {
       systemAssigned: true
     }
-    publicNetworkAccessForIngestion: 'Disabled'
-    publicNetworkAccessForQuery: 'Disabled'
-    storageInsightsConfigs: [
-      {
-        storageAccountResourceId: '<storageAccountResourceId>'
-        tables: [
-          'LinuxsyslogVer2v0'
-          'WADETWEventTable'
-          'WADServiceFabric*EventTable'
-          'WADWindowsEventLogsTable'
-        ]
-      }
-    ]
+    publicNetworkAccessForIngestion: 'Enabled'
+    publicNetworkAccessForQuery: 'Enabled'
     useResourcePermissions: true
   }
 }
@@ -853,7 +822,7 @@ module modDevStorageAccount 'br/public:avm/res/storage/storage-account:0.6.2' = 
 // <--- SOURCE CONTROL RESOURCE ---> //
 
 // resource resProdSrcControls 'Microsoft.Web/sites/sourcecontrols@2022-09-01' = {
-//   parent: resSpokeAppService
+//   parent: modDevAppService
 //   name: 'web'
 //   properties: {
 //     repoUrl: 'https://github.com/Azure-Samples/dotnetcore-docs-hello-world'
@@ -862,7 +831,8 @@ module modDevStorageAccount 'br/public:avm/res/storage/storage-account:0.6.2' = 
 //       }
 //     }
 
-/////////////// OLD PROJECT BELOW HERE \\\\\\\\\\\\\
+
+    /////////////// OLD PROJECT BELOW HERE \\\\\\\\\\\\\
 
 // PRIVATE DNS ZONE MODULES
 // module modPrivateDnsZoneKeyVault 'modules/privatednszone.bicep' = {
