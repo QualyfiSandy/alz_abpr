@@ -70,22 +70,14 @@ module modCoreVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.1' =
       {
         addressPrefix: '10.20.1.0/24'
         name: 'vmSubnet'
-        networkSecurityGroup: {
-          id: modNetworkSecurityGroup
-        }
-        routeTable: {
-          id: modRouteTable.outputs.resourceId
-        }
+        networkSecurityGroupResourceId: modNetworkSecurityGroup.outputs.resourceId
+        routeTableResourceId: modRouteTable.outputs.resourceId
       }
       {
         addressPrefix: '10.20.2.0/24'
         name: 'kvSubnet'
-        networkSecurityGroup: {
-          id: modNetworkSecurityGroup
-        }
-        routeTable: {
-          id: modRouteTable.outputs.resourceId
-        }
+        networkSecurityGroupResourceId: modNetworkSecurityGroup.outputs.resourceId
+        routeTableResourceId: modRouteTable.outputs.resourceId
       }
     ]
   }
@@ -117,39 +109,21 @@ module modDevSpokeVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.
     subnets: [
       {
         name: 'AppSubnet'
-        properties: {
-          addressPrefix: '10.30.1.0/24'
-          networkSecurityGroup: {
-            id: modNetworkSecurityGroup
-          }
-          routeTable: {
-            id: modRouteTable.outputs.resourceId
-          }
-        }
+        addressPrefix: '10.30.1.0/24'
+        networkSecurityGroupResourceId: modNetworkSecurityGroup.outputs.resourceId
+        routeTableResourceId: modRouteTable.outputs.resourceId
       }
       {
         name: 'SqlSubnet'
-        properties: {
-          addressPrefix: '10.30.2.0/24'
-          networkSecurityGroup: {
-            id: modNetworkSecurityGroup
-          }
-          routeTable: {
-            id: modRouteTable.outputs.resourceId
-          }
-        }
+        addressPrefix: '10.30.2.0/24'
+        networkSecurityGroupResourceId: modNetworkSecurityGroup.outputs.resourceId
+        routeTableResourceId: modRouteTable.outputs.resourceId
       }
       {
         name: 'StSubnet'
-        properties: {
-          addressPrefix: '10.30.3.0/24'
-          networkSecurityGroup: {
-            id: modNetworkSecurityGroup
-          }
-          routeTable: {
-            id: modRouteTable.outputs.resourceId
-          }
-        }
+        addressPrefix: '10.30.3.0/24'
+        networkSecurityGroupResourceId: modNetworkSecurityGroup.outputs.resourceId
+        routeTableResourceId: modRouteTable.outputs.resourceId
       }
     ]
   }
@@ -179,39 +153,21 @@ module modProdSpokeVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1
     subnets: [
       {
         name: 'AppSubnet'
-        properties: {
-          addressPrefix: '10.31.1.0/24'
-          networkSecurityGroup: {
-            id: modNetworkSecurityGroup
-          }
-          routeTable: {
-            id: modRouteTable.outputs.resourceId
-          }
-        }
+        addressPrefix: '10.31.1.0/24'
+        networkSecurityGroupResourceId: modNetworkSecurityGroup.outputs.resourceId
+        routeTableResourceId: modRouteTable.outputs.resourceId
       }
       {
         name: 'SqlSubnet'
-        properties: {
-          addressPrefix: '10.31.2.0/24'
-          networkSecurityGroup: {
-            id: modNetworkSecurityGroup
-          }
-          routeTable: {
-            id: modRouteTable.outputs.resourceId
-          }
-        }
+        addressPrefix: '10.31.2.0/24'
+        networkSecurityGroupResourceId: modNetworkSecurityGroup.outputs.resourceId
+        routeTableResourceId: modRouteTable.outputs.resourceId
       }
       {
         name: 'StSubnet'
-        properties: {
-          addressPrefix: '10.31.3.0/24'
-          networkSecurityGroup: {
-            id: modNetworkSecurityGroup
-          }
-          routeTable: {
-            id: modRouteTable.outputs.resourceId
-          }
-        }
+        addressPrefix: '10.31.3.0/24'
+        networkSecurityGroupResourceId: modNetworkSecurityGroup.outputs.resourceId
+        routeTableResourceId: modRouteTable.outputs.resourceId
       }
     ]
   }
