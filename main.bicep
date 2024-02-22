@@ -222,7 +222,7 @@ module modNetworkSecurityGroup 'br/public:avm/res/network/network-security-group
 // DNS ZONES //
 
 module modSqlPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' = {
-  name: 'Sql Private DNS Zone module'
+  name: 'SqlPrivateDNSZone'
   params: {
     // Required parameters
     name: varSqlEndpoint
@@ -250,7 +250,7 @@ module modSqlPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' =
 }
 
 module modStPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' = {
-  name: 'Storage Account Private DNS Zone module'
+  name: 'StorageAccountPrivateDNSZone'
   params: {
     // Required parameters
     name: varStEndpoint
@@ -278,7 +278,7 @@ module modStPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' = 
 }
 
 module modKvPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' = {
-  name: 'Key Vault Private DNS Zone module'
+  name: 'KeyVaultPrivateDNSZone'
   params: {
     // Required parameters
     name: varKeyVaultEndpoint
@@ -306,7 +306,7 @@ module modKvPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' = 
 }
 
 module modAspPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' = {
-  name: 'App Service Plan Private DNS Zone module'
+  name: 'AppServicePlanPrivateDNSZone'
   params: {
     // Required parameters
     name: 'privatelink.azurewebsites.net'
@@ -356,22 +356,22 @@ module modBastionHost 'br/public:avm/res/network/bastion-host:0.1.1' = {
 
 // VPN Gateway //
 
-module modVirtualNetworkGateway 'br/public:avm/res/network/virtual-network-gateway:0.1.0' = {
-  name: 'VPN-Gateway'
-  params: {
-    // Required parameters
-    gatewayType: 'Vpn'
-    name: 'vgw-hub-${paramlocation}-001'
-    skuName: 'VpnGw1'
-    vNetResourceId: modHubVirtualNetwork.outputs.resourceId
-    // Non-required parameters
-    activeActive: true
-    enablePrivateIpAddress: false
-    location: paramlocation
-    vpnGatewayGeneration: 'Generation1'
-    vpnType: 'RouteBased'
-  }
-}
+// module modVirtualNetworkGateway 'br/public:avm/res/network/virtual-network-gateway:0.1.0' = {
+//   name: 'VPN-Gateway'
+//   params: {
+//     // Required parameters
+//     gatewayType: 'Vpn'
+//     name: 'vgw-hub-${paramlocation}-001'
+//     skuName: 'VpnGw1'
+//     vNetResourceId: modHubVirtualNetwork.outputs.resourceId
+//     // Non-required parameters
+//     activeActive: true
+//     enablePrivateIpAddress: false
+//     location: paramlocation
+//     vpnGatewayGeneration: 'Generation1'
+//     vpnType: 'RouteBased'
+//   }
+// }
 
 // VM //
 
