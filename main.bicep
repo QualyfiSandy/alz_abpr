@@ -50,7 +50,7 @@ module modCoreVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.1' =
     addressPrefixes: [
       '10.20.0.0/16'
     ]
-    name: 'core-${paramlocation}-001'
+    name: 'core-${paramlocation}-002'
     // Non-required parameters
     location: paramlocation
     peerings: [
@@ -659,7 +659,7 @@ module modAppInsights 'br/public:avm/res/insights/component:0.2.0' = {
   params: {
     // Required parameters
     name: 'App Insights'
-    workspaceResourceId: modLogAnalyticsWorkspace.outputs.logAnalyticsWorkspaceId
+    workspaceResourceId: modLogAnalyticsWorkspace.outputs.resourceId
     // Non-required parameters
     location: paramlocation
     kind: 'web'
