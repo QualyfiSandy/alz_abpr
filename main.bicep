@@ -227,23 +227,26 @@ module modSqlPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' =
     // Required parameters
     name: varSqlEndpoint
     // Non-required parameters
-    location: 'global'
     virtualNetworkLinks: [
       {
-        registrationEnabled: true
+        registrationEnabled: false
         virtualNetworkResourceId: modHubVirtualNetwork.outputs.resourceId
+        location: 'global'
       }
       {
-        registrationEnabled: true
+        registrationEnabled: false
         virtualNetworkResourceId: modCoreVirtualNetwork.outputs.resourceId
+        location: 'global'
       }
       {
-        registrationEnabled: true
+        registrationEnabled: false
         virtualNetworkResourceId: modProdSpokeVirtualNetwork.outputs.resourceId
+        location: 'global'
       }
       {
-        registrationEnabled: true
+        registrationEnabled: false
         virtualNetworkResourceId: modDevSpokeVirtualNetwork.outputs.resourceId
+        location: 'global'
       }
     ]
   }
@@ -255,23 +258,26 @@ module modStPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' = 
     // Required parameters
     name: varStEndpoint
     // Non-required parameters
-    location: 'global'
     virtualNetworkLinks: [
       {
-        registrationEnabled: true
+        registrationEnabled: false
         virtualNetworkResourceId: modHubVirtualNetwork.outputs.resourceId
+        location: 'global'
       }
       {
-        registrationEnabled: true
+        registrationEnabled: false
         virtualNetworkResourceId: modCoreVirtualNetwork.outputs.resourceId
+        location: 'global'
       }
       {
-        registrationEnabled: true
+        registrationEnabled: false
         virtualNetworkResourceId: modProdSpokeVirtualNetwork.outputs.resourceId
+        location: 'global'
       }
       {
-        registrationEnabled: true
+        registrationEnabled: false
         virtualNetworkResourceId: modDevSpokeVirtualNetwork.outputs.resourceId
+        location: 'global'
       }
     ]
   }
@@ -283,23 +289,26 @@ module modKvPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' = 
     // Required parameters
     name: varKeyVaultEndpoint
     // Non-required parameters
-    location: 'global'
     virtualNetworkLinks: [
       {
-        registrationEnabled: true
+        registrationEnabled: false
         virtualNetworkResourceId: modHubVirtualNetwork.outputs.resourceId
+        location: 'global'
       }
       {
-        registrationEnabled: true
+        registrationEnabled: false
         virtualNetworkResourceId: modCoreVirtualNetwork.outputs.resourceId
+        location: 'global'
       }
       {
-        registrationEnabled: true
+        registrationEnabled: false
         virtualNetworkResourceId: modProdSpokeVirtualNetwork.outputs.resourceId
+        location: 'global'
       }
       {
-        registrationEnabled: true
+        registrationEnabled: false
         virtualNetworkResourceId: modDevSpokeVirtualNetwork.outputs.resourceId
+        location: 'global'
       }
     ]
   }
@@ -311,23 +320,26 @@ module modAspPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' =
     // Required parameters
     name: 'privatelink.azurewebsites.net'
     // Non-required parameters
-    location: 'global'
     virtualNetworkLinks: [
       {
-        registrationEnabled: true
+        registrationEnabled: false
         virtualNetworkResourceId: modHubVirtualNetwork.outputs.resourceId
+        location: 'global'
       }
       {
-        registrationEnabled: true
+        registrationEnabled: false
         virtualNetworkResourceId: modCoreVirtualNetwork.outputs.resourceId
+        location: 'global'
       }
       {
-        registrationEnabled: true
+        registrationEnabled: false
         virtualNetworkResourceId: modProdSpokeVirtualNetwork.outputs.resourceId
+        location: 'global'
       }
       {
-        registrationEnabled: true
+        registrationEnabled: false
         virtualNetworkResourceId: modDevSpokeVirtualNetwork.outputs.resourceId
+        location: 'global'
       }
     ]
   }
