@@ -775,18 +775,14 @@ module modDevStorageAccount 'br/public:avm/res/storage/storage-account:0.6.2' = 
   }
 }
 
-// <--- SOURCE CONTROL RESOURCE ---> //
+// <--- SOURCE CONTROL ---> //
 
-// resource resProdSrcControls 'Microsoft.Web/sites/sourcecontrols@2022-09-01' = {
-//   parent: modDevAppService
-//   name: 'web'
-//   properties: {
-//     repoUrl: 'https://github.com/Azure-Samples/dotnetcore-docs-hello-world'
-//     branch: 'master'
-//     isManualIntegration: true
-//       }
-//     }
-
+module modsrcctrl 'srcctrl.bicep' = {
+  name: 'src-control'
+  params: {
+    paramsrcctrlname: 'as-dev-${paramlocation}-001-12345/web'
+  }
+}
 
     /////////////// OLD PROJECT BELOW HERE \\\\\\\\\\\\\
 
