@@ -227,7 +227,7 @@ module modSqlPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' =
     // Required parameters
     name: varSqlEndpoint
     // Non-required parameters
-    location: paramlocation
+    location: 'global'
     virtualNetworkLinks: [
       {
         registrationEnabled: true
@@ -255,7 +255,7 @@ module modStPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' = 
     // Required parameters
     name: varStEndpoint
     // Non-required parameters
-    location: paramlocation
+    location: 'global'
     virtualNetworkLinks: [
       {
         registrationEnabled: true
@@ -283,7 +283,7 @@ module modKvPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' = 
     // Required parameters
     name: varKeyVaultEndpoint
     // Non-required parameters
-    location: paramlocation
+    location: 'global'
     virtualNetworkLinks: [
       {
         registrationEnabled: true
@@ -311,7 +311,7 @@ module modAspPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' =
     // Required parameters
     name: 'privatelink.azurewebsites.net'
     // Non-required parameters
-    location: paramlocation
+    location: 'global'
     virtualNetworkLinks: [
       {
         registrationEnabled: true
@@ -335,24 +335,24 @@ module modAspPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' =
 
 // BASTION //
 
-module modBastionHost 'br/public:avm/res/network/bastion-host:0.1.1' = {
-  name: 'Bastion'
-  params: {
-    // Required parameters
-    name: 'bas-hub-${paramlocation}-001'
-    vNetId: modHubVirtualNetwork.outputs.resourceId
-    bastionSubnetPublicIpResourceId: ''
-    // Non-required parameters
-    location: paramlocation
-    skuName: 'Standard'
-    publicIPAddressObject: {
-      allocationMethod: 'Static'
-      name: 'pip-ab-${paramlocation}'
-      publicIPPrefixResourceId: ''
-      skuName: 'Standard'
-    }
-  }
-}
+// module modBastionHost 'br/public:avm/res/network/bastion-host:0.1.1' = {
+//   name: 'Bastion'
+//   params: {
+//     // Required parameters
+//     name: 'bas-hub-${paramlocation}-001'
+//     vNetId: modHubVirtualNetwork.outputs.resourceId
+//     bastionSubnetPublicIpResourceId: ''
+//     // Non-required parameters
+//     location: paramlocation
+//     skuName: 'Standard'
+//     publicIPAddressObject: {
+//       allocationMethod: 'Static'
+//       name: 'pip-ab-${paramlocation}'
+//       publicIPPrefixResourceId: ''
+//       skuName: 'Standard'
+//     }
+//   }
+// }
 
 // VPN Gateway //
 
