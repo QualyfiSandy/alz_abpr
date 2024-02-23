@@ -24,6 +24,22 @@ param pNICVMIP string
 param pVMName string
 param pVMComputerName string
 param pVMSize string
+param pRSVName string
+param pDevAppServicePlanName string
+param pAppServicePlanSku string
+param pAppServicePlanTier string
+param pProdAppServicePlanName string
+param pDevAppServiceName string
+param pProdAppServiceName string
+param pLogAnalyticsWorkspaceName string
+param pProdSqlServerName string
+param pDevSqlServerName string
+param pDevSqlDatabaseName string
+param pProdSqlDatabaseName string
+param pProdStName string
+param pDevStName string
+param pStKind string
+param pStSkuName string
 
 param pVPNGatewayType string
 param pVPNGatewaySkuName string
@@ -506,9 +522,9 @@ module modCoreVirtualMachine 'br/public:avm/res/compute/virtual-machine:0.2.1' =
         storageAccountType: 'Premium_LRS'
       }
     }
-    backupPolicyName: '<backupPolicyName>'
-    backupVaultName: '<backupVaultName>'
-    backupVaultResourceGroup: '<backupVaultResourceGroup>'
+    backupPolicyName: 'DefaultPolicy'
+    backupVaultName: modRecoveryServiceVault.name
+    backupVaultResourceGroup: modRecoveryServiceVault.outputs.resourceGroupName
     enableAutomaticUpdates: true
     encryptionAtHost: false
     extensionAntiMalwareConfig: {
@@ -563,12 +579,12 @@ module modEncryptionKeyVault 'br/public:avm/res/key-vault/vault:0.3.4' = {
 // App Service + Plan //
 
 module modDevAppServicePlan 'br/public:avm/res/web/serverfarm:0.1.0' = {
-  name: 'Dev-ASP'
+  name: 'DevAppServicePlan'
   params: {
-    name: 'asp-dev-${pLocation}-001-12345'
+    name: pDevAppServicePlanName
     sku: {
-      name: 'S1'
-      tier: 'Standard'
+      name: pAppServicePlanSku
+      tier: pAppServicePlanTier
     }
     kind: 'Linux'
     location: pLocation
@@ -576,12 +592,12 @@ module modDevAppServicePlan 'br/public:avm/res/web/serverfarm:0.1.0' = {
 }
 
 module modProdAppServicePlan 'br/public:avm/res/web/serverfarm:0.1.0' = {
-  name: 'Prod-ASP'
+  name: 'ProdAppServicePlan'
   params: {
-    name: 'asp-prod-${pLocation}-001-123456'
+    name: pProdAppServicePlanName
     sku: {
-      name: 'S1'
-      tier: 'Standard'
+      name: pAppServicePlanSku
+      tier: pAppServicePlanTier
     }
     kind: 'Linux'
     location: pLocation
@@ -592,7 +608,7 @@ module modDevAppService 'br/public:avm/res/web/site:0.2.0' = {
   name: 'DevAppService'
   params: {
     kind: 'app'
-    name: 'as-dev-${pLocation}-001-12345'
+    name: pDevAppServiceName
     serverFarmResourceId: modDevAppServicePlan.outputs.resourceId
     location: pLocation
     httpsOnly: true
@@ -619,7 +635,7 @@ module modProdAppService 'br/public:avm/res/web/site:0.2.0' = {
   name: 'ProdAppService'
   params: {
     kind: 'app'
-    name: 'as-prod-${pLocation}-001-12345'
+    name: pProdAppServiceName
     serverFarmResourceId: modDevAppServicePlan.outputs.resourceId
     location: pLocation
     httpsOnly: true
@@ -646,7 +662,7 @@ module modAppInsights 'br/public:avm/res/insights/component:0.2.0' = {
   name: 'appInsights'
   params: {
     // Required parameters
-    name: 'App Insights'
+    name: 'App-Insights'
     workspaceResourceId: modLogAnalyticsWorkspace.outputs.resourceId
     // Non-required parameters
     location: pLocation
@@ -660,7 +676,7 @@ module modLogAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspac
   name: 'LogAnalyticsWorkspace'
   params: {
     // Required parameters
-    name: 'log-core-${pLocation}-001-21020242'
+    name: pLogAnalyticsWorkspaceName
     // Non-required parameters
     dailyQuotaGb: 10
     dataSources: [
@@ -702,11 +718,8 @@ module modLogAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspac
       }
     ]
     location: pLocation
-    managedIdentities: {
-      systemAssigned: true
-    }
-    publicNetworkAccessForIngestion: 'Enabled'
-    publicNetworkAccessForQuery: 'Enabled'
+    publicNetworkAccessForIngestion: 'Disabled'
+    publicNetworkAccessForQuery: 'Disabled'
     useResourcePermissions: true
   }
 }
@@ -716,14 +729,13 @@ module modLogAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspac
 module modProdSqlServer 'br/public:avm/res/sql/server:0.1.5' = {
   name: 'ProdSQLServer'
   params: {
-    // Required parameters
-    name: 'sql-prod-${pLocation}-001-21022024'
-    // Non-required parameters
-    administratorLogin: 'adminUserName'
-    administratorLoginPassword: '<administratorLoginPassword>'
+    name: pProdSqlServerName
+    administratorLogin: 'usersandy'
+    administratorLoginPassword: 'GoodbyeMonkey987!'
     location: pLocation
     databases: [
       {
+        name: pProdSqlDatabaseName
         skuName: 'Basic'
         skuTier: 'Basic'
       }
@@ -742,14 +754,13 @@ module modProdSqlServer 'br/public:avm/res/sql/server:0.1.5' = {
 module modDevSqlServer 'br/public:avm/res/sql/server:0.1.5' = {
   name: 'DevSQLServer'
   params: {
-    // Required parameters
-    name: 'sql-dev-${pLocation}-001-210220242'
-    // Non-required parameters
-    administratorLogin: 'adminUserName'
-    administratorLoginPassword: '<administratorLoginPassword>'
+    name: pDevSqlServerName
+    administratorLogin: 'sandyuser1'
+    administratorLoginPassword: 'HelloMonkey123!'
     location: pLocation
     databases: [
       {
+        name: pDevSqlDatabaseName
         skuName: 'Basic'
         skuTier: 'Basic'
       }
@@ -768,11 +779,9 @@ module modDevSqlServer 'br/public:avm/res/sql/server:0.1.5' = {
 module modProdStorageAccount 'br/public:avm/res/storage/storage-account:0.6.2' = {
   name: 'ProdStorageAccount'
   params: {
-    // Required parameters
-    name: 'stprod00121022024'
-    // Non-required parameters
-    kind: 'StorageV2'
-    skuName: 'Standard_LRS'
+    name: pProdStName
+    kind: pStKind
+    skuName: pStSkuName
     location: pLocation
     privateEndpoints: [
       {
@@ -789,11 +798,9 @@ module modProdStorageAccount 'br/public:avm/res/storage/storage-account:0.6.2' =
 module modDevStorageAccount 'br/public:avm/res/storage/storage-account:0.6.2' = {
   name: 'DevStorageAccount'
   params: {
-    // Required parameters
-    name: 'stdev00121022024'
-    // Non-required parameters
-    kind: 'StorageV2'
-    skuName: 'Standard_LRS'
+    name: pDevStName
+    kind: pStKind
+    skuName: pStSkuName
     location: pLocation
     privateEndpoints: [
       {
@@ -819,13 +826,11 @@ module modsrcctrl 'srcctrl.bicep' = {
 
 // RECOVERY SERVICES VAULT //
 
-module vault './ResourceModules/modules/recovery-services/vault/main.bicep' = {
-  name: '${uniqueString(deployment().name, location)}-test-rsvmin'
+module modRecoveryServiceVault './CARMLResourceModules/modules/recovery-services/vault/main.bicep' = {
+  name: 'RecoveryServiceVault'
   params: {
-    // Required parameters
-    name: 'rsvmin001'
-    // Non-required parameters
-    enableDefaultTelemetry: '<enableDefaultTelemetry>'
+    name: pRSVName
+    location: pLocation
   }
 }
 
@@ -1004,17 +1009,17 @@ module modAgw 'modules/appgw.bicep' = {
 // }
 
 // RSV MODULE
-module modRecoveryVault 'modules/recoveryvault.bicep' = {
-  name: 'recoveryservicevault'
-  params: {
-    paramVaultName: 'rsv-core-${pLocation}-001'
-    vaultStorageType: 'GeoRedundant'
-    enableCRR: true
-    paramlocation: pLocation
-    paramSourceResourceId: modCoreVirtualMachine.outputs.resourceId
-    paramVMName: modCoreVirtualMachine.name
-  }
-}
+// module modRecoveryVault 'modules/recoveryvault.bicep' = {
+//   name: 'recoveryservicevault'
+//   params: {
+//     paramVaultName: 'rsv-core-${pLocation}-001'
+//     vaultStorageType: 'GeoRedundant'
+//     enableCRR: true
+//     paramlocation: pLocation
+//     paramSourceResourceId: modCoreVirtualMachine.outputs.resourceId
+//     paramVMName: modCoreVirtualMachine.name
+//   }
+// }
 
 // resource resKeyVault 'Microsoft.KeyVault/vaults@2019-09-01' existing = {
 //   name: keyVaultName

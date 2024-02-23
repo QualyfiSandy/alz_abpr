@@ -65,11 +65,6 @@ jobs:
         appServiceAppHostName: ${{ steps.deploy.outputs.appServiceAppHostName }}
     steps:
     - uses: actions/checkout@v3
-    - name: Check out the CARML repo
-      run: |
-       git config --global url.https://github.com/.insteadOf git://github.com/
-       git clone https://github.com/Azure/ResourceModules.git
-       ls
     - uses: azure/login@v1
       with:
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
