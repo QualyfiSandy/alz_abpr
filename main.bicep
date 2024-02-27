@@ -18,7 +18,7 @@ param pRouteTableName string
 param pBastionName string
 param pBastionPIPName string
 param pVPNGatewayName string
-param pCoreSecretKeyVaultName string
+param pCoreSecKeyVaultName string
 param pCoreEncryptionKeyVaultName string
 param pNICVMIP string
 param pVMName string
@@ -74,8 +74,8 @@ var varSqlEndpoint = 'privatelink${environment().suffixes.sqlServerHostname}'
 var varKeyVaultEndpoint = 'privatelink${environment().suffixes.keyvaultDns}'
 var varStEndpoint = 'privatelink.blob.${environment().suffixes.storage}'
 
-resource coreSecretKeyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
-  name: pCoreSecretKeyVaultName
+resource coreSecKeyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
+  name: pCoreSecKeyVaultName
 }
 
 // VIRTUAL NETWORKS //
@@ -490,8 +490,8 @@ module modCoreVirtualMachine 'br/public:avm/res/compute/virtual-machine:0.2.1' =
   name: 'VirtualMachine'
   params: {
     name: pVMName
-    adminUsername: coreSecretKeyVault.getSecret('VMusername')
-    adminPassword: coreSecretKeyVault.getSecret('VMpassword')
+    adminUsername: coreSecKeyVault.getSecret('VMusername')
+    adminPassword: coreSecKeyVault.getSecret('VMpassword')
     computerName: pVMComputerName
     osType: 'Windows'
     vmSize: pVMSize
@@ -816,7 +816,7 @@ module modDevStorageAccount 'br/public:avm/res/storage/storage-account:0.6.2' = 
 
 // <--- SOURCE CONTROL ---> //
 
-module modsrcctrl 'srcctrl.bicep' = {
+module modsrcctrl './modules/srcctrl.bicep' = {
   name: 'src-control'
   // dependsOn: [modDevAppService]
   params: {
@@ -826,7 +826,7 @@ module modsrcctrl 'srcctrl.bicep' = {
 
 // RECOVERY SERVICES VAULT //
 
-module modRecoveryServiceVault './CARMLResourceModules/modules/recovery-services/vault/main.bicep' = {
+module modRecoveryServiceVault './ResourceModules/modules/recovery-services/vault/main.bicep' = {
   name: 'RecoveryServiceVault'
   params: {
     name: pRSVName

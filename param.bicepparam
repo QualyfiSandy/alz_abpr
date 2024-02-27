@@ -2,7 +2,7 @@ using './main.bicep'
 
 param pLocation = 'uksouth'
 
-param pCoreSecretKeyVaultName = 'kv-secret-core-sandy'
+param pCoreSecKeyVaultName = 'kv-secret-core-sandy'
 param pHubVnetName = 'hub-${pLocation}-001'
 param pCoreVnetName = 'core-${pLocation}-001'
 param pDevVnetName = 'dev-${pLocation}-001'
