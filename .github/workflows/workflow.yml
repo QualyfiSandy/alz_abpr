@@ -11,7 +11,7 @@ permissions:
     contents: read
 
 env:
-    AZURE_RESOURCEGROUP_NAME: rg-github-actions-landing-zone-sandy
+    AZURE_RESOURCEGROUP_NAME: azure-devops-track-landing-zone-sandy
     ENVIRONMENT: nonprod
 
 jobs:
