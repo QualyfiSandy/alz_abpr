@@ -19,8 +19,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/checkout@v3
-        name: check-out-CARML
+      - name: check-CARML-repo
+        uses: actions/checkout@v3
         with:
           repository: Azure/ResourceModules
           path: ./ResourceModules
@@ -39,7 +39,7 @@ jobs:
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
     - uses: actions/checkout@v3
-      name: check-out-CARML
+      name: check-CARML-repo
       with:
           repository: Azure/ResourceModules
           path: ./ResourceModules
@@ -64,7 +64,7 @@ jobs:
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
     - uses: actions/checkout@v3
-      name: check-out-CARML
+      name: check-CARML-repo
       with:
           repository: Azure/ResourceModules
           path: ./ResourceModules
