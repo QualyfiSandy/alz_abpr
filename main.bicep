@@ -78,6 +78,7 @@ var vProdStAddress = '${pProdVnetAddressPrefix}.3.0/24'
 var varSqlEndpoint = 'privatelink${environment().suffixes.sqlServerHostname}'
 var varKeyVaultEndpoint = 'privatelink${environment().suffixes.keyvaultDns}'
 var varStEndpoint = 'privatelink.blob.${environment().suffixes.storage}'
+var vAppGwId = resourceId('Microsoft.Network/applicationGateways',pAppGatewayName)
 
 resource coreSecKeyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
   name: pCoreSecKeyVaultName
@@ -1008,7 +1009,7 @@ module applicationGateway './ResourceModules/modules/network/application-gateway
     ]
     backendHttpSettingsCollection: [
       {
-        name: 'appServiceBackendHttpsSetting'
+        name: 'appServiceBackendHttpSetting'
         properties: {
           cookieBasedAffinity: 'Disabled'
           port: 80
@@ -1021,10 +1022,10 @@ module applicationGateway './ResourceModules/modules/network/application-gateway
         name: 'httplisteners'
         properties: {
           frontendIPConfiguration: {
-            id: resourceId('Microsoft.Network/applicationGateways/frontendIPConfigurations', pAppGatewayName, 'appGatewayFrontendIp')
+            id: '${vAppGwId}/frontendIPConfigurations/appgw-frontendIP'
           }
           frontendPort: {
-            id: resourceId('Microsoft.Network/applicationGateways/frontendPorts', pAppGatewayName, 'port_80')
+            id: '${vAppGwId}/frontendPorts/port80'
           }
           hostNames: []
           protocol: 'https'
@@ -1036,13 +1037,13 @@ module applicationGateway './ResourceModules/modules/network/application-gateway
         name: 'routingrules'
         properties: {
           backendAddressPool: {
-            id: resourceId('Microsoft.Network/applicationGateways/httpListeners', pAppGatewayName, 'myListener')
+            id: '${vAppGwId}/backendAddressPools/appServiceBackendPool'
           }
           backendHttpSettings: {
-            id: resourceId('Microsoft.Network/applicationGateways/backendAddressPools', pAppGatewayName, 'myBackendPool')
+            id: '${vAppGwId}/backendHttpSettingsCollection/appServiceBackendHttpSetting'
           }
           httpListener: {
-            id: resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', pAppGatewayName, 'myHTTPSetting')
+            id: '${vAppGwId}/httpListeners/httplisteners'
           }
           ruleType: 'Basic'
         }
@@ -1078,6 +1079,7 @@ module azureFirewall './ResourceModules/modules/network/azure-firewall/main.bice
   params: {
     name: pAzureFirewallName
     location: pLocation
+    firewallPolicyId: firewallPolicy.outputs.resourceId
     publicIPAddressObject: {
       diagnosticSettings: [
         {
@@ -1119,7 +1121,7 @@ module firewallPolicy 'br/public:avm/res/network/firewall-policy:0.1.1' = {
             }
             name: 'AllowAll'
             priority: 100
-            ruleCollectionType: 'NetworkRule'
+            ruleCollectionType: 'FirewallPolicyFilterRuleCollection'
             rules: [
               {
                 name: 'AFW-Allow-All'
