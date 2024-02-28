@@ -294,7 +294,7 @@ module modNetworkSecurityGroup 'br/public:avm/res/network/network-security-group
   name: 'NetworkSecurityGroup'
   params: {
     // Required parameters
-    name: 'Default NSG'
+    name: 'DefaultNSG'
     // Non-required parameters
     location: pLocation
     securityRules: [
