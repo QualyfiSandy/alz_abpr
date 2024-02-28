@@ -40,6 +40,11 @@ param pProdStName string
 param pDevStName string
 param pStKind string
 param pStSkuName string
+param pAppGatewayName string
+param pAppGatewayPIPName string
+param pAzureFirewallName string
+param pAzureFirewallPIPName string
+param pAzureFirewallPolicyName string
 
 param pVPNGatewayType string
 param pVPNGatewaySkuName string
@@ -551,6 +556,132 @@ module modCoreVirtualMachine 'br/public:avm/res/compute/virtual-machine:0.2.1' =
   }
 }
 
+// VM INSIGHTS //
+
+module solution 'br/public:avm/res/operations-management/solution:0.1.2' = {
+  name: 'VMInsights'
+  params: {
+    logAnalyticsWorkspaceName: modLogAnalyticsWorkspace.outputs.name
+    name: 'VMInsights'
+    location: pLocation
+    product: 'OMSGallery/VMInsights'
+    publisher: 'Microsoft'
+  }
+}
+
+// DATA COLLECTION RULE //
+
+module dataCollectionRule 'br/public:avm/res/insights/data-collection-rule:0.1.2' = {
+  name: 'DataCollectionRule'
+  params: {
+    name: 'Data-Collection-Rule'
+    description: 'Collecting Windows-specific performance counters and Windows Event Logs'
+    kind: 'Windows'
+    location: pLocation
+    dataFlows: [
+      {
+        destinations: [
+          'VMInsightsPerf-Logs-Dest'
+        ]
+        streams: [
+          'Microsoft-InsightsMetrics'
+        ]
+      }
+      {
+        destinations: [
+          modLogAnalyticsWorkspace.name
+        ]
+        streams: [
+          'Microsoft-Event'
+        ]
+      }
+    ]
+    dataSources: {
+      performanceCounters: [
+        {
+          counterSpecifiers: [
+            '\\LogicalDisk(_Total)\\% Disk Read Time'
+            '\\LogicalDisk(_Total)\\% Disk Time'
+            '\\LogicalDisk(_Total)\\% Disk Write Time'
+            '\\LogicalDisk(_Total)\\% Free Space'
+            '\\LogicalDisk(_Total)\\% Idle Time'
+            '\\LogicalDisk(_Total)\\Avg. Disk Queue Length'
+            '\\LogicalDisk(_Total)\\Avg. Disk Read Queue Length'
+            '\\LogicalDisk(_Total)\\Avg. Disk sec/Read'
+            '\\LogicalDisk(_Total)\\Avg. Disk sec/Transfer'
+            '\\LogicalDisk(_Total)\\Avg. Disk sec/Write'
+            '\\LogicalDisk(_Total)\\Avg. Disk Write Queue Length'
+            '\\LogicalDisk(_Total)\\Disk Bytes/sec'
+            '\\LogicalDisk(_Total)\\Disk Read Bytes/sec'
+            '\\LogicalDisk(_Total)\\Disk Reads/sec'
+            '\\LogicalDisk(_Total)\\Disk Transfers/sec'
+            '\\LogicalDisk(_Total)\\Disk Write Bytes/sec'
+            '\\LogicalDisk(_Total)\\Disk Writes/sec'
+            '\\LogicalDisk(_Total)\\Free Megabytes'
+            '\\Memory\\% Committed Bytes In Use'
+            '\\Memory\\Available Bytes'
+            '\\Memory\\Cache Bytes'
+            '\\Memory\\Committed Bytes'
+            '\\Memory\\Page Faults/sec'
+            '\\Memory\\Pages/sec'
+            '\\Memory\\Pool Nonpaged Bytes'
+            '\\Memory\\Pool Paged Bytes'
+            '\\Network Interface(*)\\Bytes Received/sec'
+            '\\Network Interface(*)\\Bytes Sent/sec'
+            '\\Network Interface(*)\\Bytes Total/sec'
+            '\\Network Interface(*)\\Packets Outbound Errors'
+            '\\Network Interface(*)\\Packets Received Errors'
+            '\\Network Interface(*)\\Packets Received/sec'
+            '\\Network Interface(*)\\Packets Sent/sec'
+            '\\Network Interface(*)\\Packets/sec'
+            '\\Process(_Total)\\Handle Count'
+            '\\Process(_Total)\\Thread Count'
+            '\\Process(_Total)\\Working Set'
+            '\\Process(_Total)\\Working Set - Private'
+            '\\Processor Information(_Total)\\% Privileged Time'
+            '\\Processor Information(_Total)\\% Processor Time'
+            '\\Processor Information(_Total)\\% User Time'
+            '\\Processor Information(_Total)\\Processor Frequency'
+            '\\System\\Context Switches/sec'
+            '\\System\\Processes'
+            '\\System\\Processor Queue Length'
+            '\\System\\System Up Time'
+          ]
+          name: 'perfCounterDataSource60'
+          samplingFrequencyInSeconds: 60
+          streams: [
+            'Microsoft-InsightsMetrics'
+          ]
+        }
+      ]
+      windowsEventLogs: [
+        {
+          name: 'WinLogEvents'
+          streams: [
+            'Microsoft-Event'
+          ]
+          xPathQueries: [
+            'Application!*[System[(Level=1 or Level=2 or Level=3 or Level=4 or Level=0 or Level=5)]]'
+            'Security!*[System[(band(Keywords,13510798882111488))]]'
+            'System!*[System[(Level=1 or Level=2 or Level=3 or Level=4 or Level=0 or Level=5)]]'
+          ]
+        }
+      ]
+    }
+    destinations: {
+      azureMonitorMetrics: {
+        name: 'VMInsightsPerf-Logs-Dest'
+      }
+      logAnalytics: [
+        {
+          name: modLogAnalyticsWorkspace.name
+          workspaceResourceId: modLogAnalyticsWorkspace.outputs.resourceId
+        }
+      ]
+    }
+  }
+}
+
 // CORE KEYVAULT //
 
 module modEncryptionKeyVault 'br/public:avm/res/key-vault/vault:0.3.4' = {
@@ -824,6 +955,112 @@ module modsrcctrl './modules/srcctrl.bicep' = {
   }
 }
 
+// APPLICATION GATEWAY //
+
+module applicationGateway './ResourceModules/modules/network/application-gateway/main.bicep' = {
+  name: 'ApplicationGateway'
+  params: {
+    name: pAppGatewayName
+    location: pLocation
+    sku: 'Standard_v2'
+    autoscaleMaxCapacity: 2
+    autoscaleMinCapacity: 1
+    gatewayIPConfigurations: [
+      {
+        name: 'appgw-ip-configuration'
+        properties: {
+          subnet: {
+            id: modHubVirtualNetwork.outputs.subnetResourceIds[1]
+          }
+        }
+      }
+    ]
+    frontendIPConfigurations: [
+      {
+        name: 'appgw-frontendIP'
+        properties: {
+          privateIPAllocationMethod: 'Dynamic'
+          publicIPAddress: {
+            id: modAppGatewayPIP.outputs.resourceId
+          }
+        }
+      }
+    ]
+    frontendPorts: [
+      {
+        name: 'port80'
+        properties: {
+          port: 80
+        }
+      }
+    ]
+    backendAddressPools: [
+      {
+        name: 'appServiceBackendPool'
+        properties: {
+          backendAddresses: [
+            {
+              fqdn: modProdAppService.outputs.defaultHostname
+            }
+          ]
+        }
+      }
+    ]
+    backendHttpSettingsCollection: [
+      {
+        name: 'appServiceBackendHttpsSetting'
+        properties: {
+          cookieBasedAffinity: 'Disabled'
+          port: 80
+          protocol: 'Http'
+        }
+      }
+    ]
+    httpListeners: [
+      {
+        name: 'httplisteners'
+        properties: {
+          frontendIPConfiguration: {
+            id: resourceId('Microsoft.Network/applicationGateways/frontendIPConfigurations', pAppGatewayName, 'appGatewayFrontendIp')
+          }
+          frontendPort: {
+            id: resourceId('Microsoft.Network/applicationGateways/frontendPorts', pAppGatewayName, 'port_80')
+          }
+          hostNames: []
+          protocol: 'https'
+        }
+      }
+    ]
+    requestRoutingRules: [
+      {
+        name: 'routingrules'
+        properties: {
+          backendAddressPool: {
+            id: resourceId('Microsoft.Network/applicationGateways/httpListeners', pAppGatewayName, 'myListener')
+          }
+          backendHttpSettings: {
+            id: resourceId('Microsoft.Network/applicationGateways/backendAddressPools', pAppGatewayName, 'myBackendPool')
+          }
+          httpListener: {
+            id: resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', pAppGatewayName, 'myHTTPSetting')
+          }
+          ruleType: 'Basic'
+        }
+      }
+    ]
+  }
+}
+
+module modAppGatewayPIP 'br/public:avm/res/network/public-ip-address:0.2.2' = {
+  name:'AppGatewayPip'
+  params:{
+    name: pAppGatewayPIPName
+    location:pLocation
+    skuName: 'Standard'
+    publicIPAllocationMethod:'Static'
+  }
+}
+
 // RECOVERY SERVICES VAULT //
 
 module modRecoveryServiceVault './ResourceModules/modules/recovery-services/vault/main.bicep' = {
@@ -831,6 +1068,80 @@ module modRecoveryServiceVault './ResourceModules/modules/recovery-services/vaul
   params: {
     name: pRSVName
     location: pLocation
+  }
+}
+
+// AZURE FIREWALL //
+
+module azureFirewall './ResourceModules/modules/network/azure-firewall/main.bicep' = {
+  name: 'AzureFirewall'
+  params: {
+    name: pAzureFirewallName
+    location: pLocation
+    publicIPAddressObject: {
+      diagnosticSettings: [
+        {
+          metricCategories: [
+            {
+              category: 'AllMetrics'
+            }
+          ]
+          name: 'customSetting'
+          workspaceResourceId: modLogAnalyticsWorkspace.outputs.resourceId
+        }
+      ]
+      name: pAzureFirewallPIPName
+      publicIPAllocationMethod: 'Static'
+      publicIPPrefixResourceId: ''
+      skuName: 'Standard'
+      skuTier: 'Regional'
+    }
+    vNetId: modHubVirtualNetwork.outputs.resourceId
+  }
+}
+
+// AZURE FIREWALL POLICY //
+
+module firewallPolicy 'br/public:avm/res/network/firewall-policy:0.1.1' = {
+  name: 'AzureFirewallPolicy'
+  params: {
+    name: pAzureFirewallPolicyName
+    autoLearnPrivateRanges: 'Enabled'
+    location: pLocation
+    ruleCollectionGroups: [
+      {
+        name: 'DefaultNetworkRuleCollectionGroup'
+        priority: 200
+        ruleCollections: [
+          {
+            action: {
+              type: 'Allow'
+            }
+            name: 'AllowAll'
+            priority: 100
+            ruleCollectionType: 'NetworkRule'
+            rules: [
+              {
+                name: 'AFW-Allow-All'
+                ipProtocols: [
+                  'Any'
+                ]
+                sourceAddresses: [
+                  '*'
+                ]
+                destinationAddresses: [
+                  '*'
+                ]
+                destinationPorts: [
+                  '*'
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+    threatIntelMode: 'Alert'
   }
 }
 
@@ -866,15 +1177,15 @@ module modRecoveryServiceVault './ResourceModules/modules/recovery-services/vaul
 //   }
 
 // APPLICATION GATEWAY MODULE
-module modAgw 'modules/appgw.bicep' = {
-    name: 'appgateway'
-    params: {
-      paramAppGatewayName: 'agw-hub-${pLocation}-001'
-      paramlocation: pLocation
-      paramAgwSubnetId: modHubVirtualNetwork.outputs.subnetResourceIds[1]
-      paramProdFqdn: modProdAppService.outputs.defaultHostname
-    }
-  }
+// module modAgw 'modules/appgw.bicep' = {
+//     name: 'appgateway'
+//     params: {
+//       paramAppGatewayName: 'agw-hub-${pLocation}-001'
+//       paramlocation: pLocation
+//       paramAgwSubnetId: modHubVirtualNetwork.outputs.subnetResourceIds[1]
+//       paramProdFqdn: modProdAppService.outputs.defaultHostname
+//     }
+//   }
 
 // // LOG ANALYTICS MODULE
 //   module modLogAnalytics 'modules/loganalytics.bicep' = {
