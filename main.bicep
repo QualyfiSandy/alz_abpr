@@ -15,9 +15,12 @@ param pAppSubnetName string
 param pSqlSubnetName string
 param pStSubnetName string
 param pRouteTableName string
-param pBastionName string
-param pBastionPIPName string
-param pVPNGatewayName string
+// param pBastionName string
+// param pBastionPIPName string
+// param pVPNGatewayName string
+// param pVPNGatewayType string
+// param pVPNGatewaySkuName string
+// param pVPNGatewayPIPName string
 param pCoreSecKeyVaultName string
 param pCoreEncryptionKeyVaultName string
 param pNICVMIP string
@@ -45,10 +48,6 @@ param pAppGatewayPIPName string
 param pAzureFirewallName string
 param pAzureFirewallPIPName string
 param pAzureFirewallPolicyName string
-
-param pVPNGatewayType string
-param pVPNGatewaySkuName string
-param pVPNGatewayPIPName string
 
 param pHubVnetAddressPrefix string
 param pCoreVnetAddressPrefix string
@@ -462,34 +461,34 @@ module modAspPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' =
 
 // BASTION //
 
-module modBastionHost 'br/public:avm/res/network/bastion-host:0.1.1' = {
-  name: 'Bastion'
-  params: {
-    name: pBastionName
-    vNetId: modHubVirtualNetwork.outputs.resourceId
-    location: pLocation
-    skuName: 'Standard'
-    publicIPAddressObject: {
-      allocationMethod: 'Static'
-      name: pBastionPIPName
-      skuName: 'Standard'
-    }
-  }
-}
+// module modBastionHost 'br/public:avm/res/network/bastion-host:0.1.1' = {
+//   name: 'Bastion'
+//   params: {
+//     name: pBastionName
+//     vNetId: modHubVirtualNetwork.outputs.resourceId
+//     location: pLocation
+//     skuName: 'Standard'
+//     publicIPAddressObject: {
+//       allocationMethod: 'Static'
+//       name: pBastionPIPName
+//       skuName: 'Standard'
+//     }
+//   }
+// }
 
-// VPN Gateway //
+// // VPN Gateway //
 
-module modVirtualNetworkGateway 'br/public:avm/res/network/virtual-network-gateway:0.1.0' = {
-  name: 'VPNGateway'
-  params: {
-    gatewayType: pVPNGatewayType
-    name: pVPNGatewayName
-    skuName: pVPNGatewaySkuName
-    vNetResourceId: modHubVirtualNetwork.outputs.resourceId
-    location: pLocation
-    gatewayPipName: pVPNGatewayPIPName
-  }
-}
+// module modVirtualNetworkGateway 'br/public:avm/res/network/virtual-network-gateway:0.1.0' = {
+//   name: 'VPNGateway'
+//   params: {
+//     gatewayType: pVPNGatewayType
+//     name: pVPNGatewayName
+//     skuName: pVPNGatewaySkuName
+//     vNetResourceId: modHubVirtualNetwork.outputs.resourceId
+//     location: pLocation
+//     gatewayPipName: pVPNGatewayPIPName
+//   }
+// }
 
 // VM //
 
@@ -777,7 +776,7 @@ module modProdAppService 'br/public:avm/res/web/site:0.2.0' = {
   params: {
     kind: 'app'
     name: pProdAppServiceName
-    serverFarmResourceId: modDevAppServicePlan.outputs.resourceId
+    serverFarmResourceId: modProdAppServicePlan.outputs.resourceId
     location: pLocation
     httpsOnly: true
     siteConfig: {
@@ -975,7 +974,7 @@ module applicationGateway './ResourceModules/modules/network/application-gateway
     name: pAppGatewayName
     location: pLocation
     sku: 'Standard_v2'
-    autoscaleMaxCapacity: 2
+    autoscaleMaxCapacity: 3
     autoscaleMinCapacity: 1
     gatewayIPConfigurations: [
       {
@@ -1022,9 +1021,9 @@ module applicationGateway './ResourceModules/modules/network/application-gateway
       {
         name: 'appServiceBackendHttpSetting'
         properties: {
-          cookieBasedAffinity: 'Disabled'
           port: 80
           protocol: 'Http'
+          pickHostNameFromBackendAddress:true
         }
       }
     ]
@@ -1038,7 +1037,7 @@ module applicationGateway './ResourceModules/modules/network/application-gateway
           frontendPort: {
             id: '${vAppGwId}/frontendPorts/port80'
           }
-          protocol: 'http'
+          protocol: 'Http'
         }
       }
     ]
