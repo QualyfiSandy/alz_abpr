@@ -870,6 +870,7 @@ module modProdSqlServer 'br/public:avm/res/sql/server:0.1.5' = {
         name: pProdSqlDatabaseName
         skuName: 'Basic'
         skuTier: 'Basic'
+        maxSizeBytes: 2147483648
       }
     ]
     privateEndpoints: [
@@ -1028,7 +1029,7 @@ module applicationGateway './ResourceModules/modules/network/application-gateway
             id: '${vAppGwId}/frontendPorts/port80'
           }
           hostNames: []
-          protocol: 'https'
+          protocol: 'http'
         }
       }
     ]
@@ -1108,7 +1109,6 @@ module firewallPolicy 'br/public:avm/res/network/firewall-policy:0.1.1' = {
   name: 'AzureFirewallPolicy'
   params: {
     name: pAzureFirewallPolicyName
-    autoLearnPrivateRanges: 'Enabled'
     location: pLocation
     ruleCollectionGroups: [
       {
@@ -1124,7 +1124,8 @@ module firewallPolicy 'br/public:avm/res/network/firewall-policy:0.1.1' = {
             ruleCollectionType: 'FirewallPolicyFilterRuleCollection'
             rules: [
               {
-                name: 'AFW-Allow-All'
+                name: 'afwAllowAll'
+                ruleType: 'NetworkRule'
                 ipProtocols: [
                   'Any'
                 ]
