@@ -524,6 +524,7 @@ module modCoreVirtualMachine 'br/public:avm/res/compute/virtual-machine:0.2.1' =
     ]
     osDisk: {
       createOption: 'fromImage'
+      diskSizeGB: '256'
       managedDisk: {
         storageAccountType: 'Premium_LRS'
       }
@@ -896,6 +897,7 @@ module modDevSqlServer 'br/public:avm/res/sql/server:0.1.5' = {
         name: pDevSqlDatabaseName
         skuName: 'Basic'
         skuTier: 'Basic'
+        maxSizeBytes: 2147483648
       }
     ]
     privateEndpoints: [
