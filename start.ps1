@@ -58,7 +58,6 @@
 
 #run the bicep file
 
-new-AzResourceGroupDeployment -TemplateFile main.bicep 
+new-AzResourceGroupDeployment -TemplateFile main.bicep
 
 # -keyVaultName $kvname -keyVaultObjectId $keyvaultojectId 
-# -randNumb $Randnumb

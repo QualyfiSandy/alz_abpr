@@ -79,6 +79,7 @@ var varSqlEndpoint = 'privatelink${environment().suffixes.sqlServerHostname}'
 var varKeyVaultEndpoint = 'privatelink${environment().suffixes.keyvaultDns}'
 var varStEndpoint = 'privatelink.blob.${environment().suffixes.storage}'
 var vAppGwId = resourceId('Microsoft.Network/applicationGateways',pAppGatewayName)
+var vRand = substring(uniqueString(resourceGroup().id),0,5)
 
 resource coreSecKeyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
   name: pCoreSecKeyVaultName
@@ -692,7 +693,7 @@ module dataCollectionRule 'br/public:avm/res/insights/data-collection-rule:0.1.2
 module modEncryptionKeyVault 'br/public:avm/res/key-vault/vault:0.3.4' = {
   name: 'CoreEcryptionKeyVault'
   params: {
-    name: pCoreEncryptionKeyVaultName
+    name: '${pCoreEncryptionKeyVaultName}${vRand}'
     sku: 'standard'
     enableRbacAuthorization: false
     enablePurgeProtection: false
@@ -869,13 +870,13 @@ module modLogAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspac
 module modProdSqlServer 'br/public:avm/res/sql/server:0.1.5' = {
   name: 'ProdSQLServer'
   params: {
-    name: pProdSqlServerName
+    name: '${pProdSqlServerName}${vRand}'
     administratorLogin: 'usersandy'
     administratorLoginPassword: 'GoodbyeMonkey987!'
     location: pLocation
     databases: [
       {
-        name: pProdSqlDatabaseName
+        name: '${pProdSqlDatabaseName}${vRand}'
         skuName: 'Basic'
         skuTier: 'Basic'
         maxSizeBytes: 2147483648
@@ -895,13 +896,13 @@ module modProdSqlServer 'br/public:avm/res/sql/server:0.1.5' = {
 module modDevSqlServer 'br/public:avm/res/sql/server:0.1.5' = {
   name: 'DevSQLServer'
   params: {
-    name: pDevSqlServerName
+    name: '${pDevSqlServerName}${vRand}'
     administratorLogin: 'sandyuser1'
     administratorLoginPassword: 'HelloMonkey123!'
     location: pLocation
     databases: [
       {
-        name: pDevSqlDatabaseName
+        name: '${pDevSqlDatabaseName}${vRand}'
         skuName: 'Basic'
         skuTier: 'Basic'
         maxSizeBytes: 2147483648
@@ -1044,9 +1045,9 @@ module applicationGateway './ResourceModules/modules/network/application-gateway
     requestRoutingRules: [
       {
         name: 'routingrules'
-        ruleType: 'Basic'
-        priority: 110
         properties: {
+          ruleType: 'Basic'
+          priority: 110
           backendAddressPool: {
             id: '${vAppGwId}/backendAddressPools/appServiceBackendPool'
           }
