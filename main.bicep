@@ -531,7 +531,7 @@ module modCoreVirtualMachine 'br/public:avm/res/compute/virtual-machine:0.2.1' =
       }
     }
     backupPolicyName: 'DefaultPolicy'
-    backupVaultName: modRecoveryServiceVault.name
+    backupVaultName: modRecoveryServiceVault.outputs.name
     backupVaultResourceGroup: modRecoveryServiceVault.outputs.resourceGroupName
     enableAutomaticUpdates: true
     encryptionAtHost: false
@@ -711,7 +711,7 @@ module modEncryptionKeyVault 'br/public:avm/res/key-vault/vault:0.3.4' = {
           modKvPrivateDnsZone.outputs.resourceId
         ]
         service: 'vault'
-        subnetResourceId: modHubVirtualNetwork.outputs.subnetResourceIds[1]
+        subnetResourceId: modCoreVirtualNetwork.outputs.subnetResourceIds[1]
       }
     ]
   }
