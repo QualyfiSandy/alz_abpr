@@ -536,6 +536,9 @@ module modCoreVirtualMachine 'br/public:avm/res/compute/virtual-machine:0.2.1' =
     encryptionAtHost: false
     extensionAntiMalwareConfig: {
       enabled: true
+      settings: {
+        AntimalwareEnabled: 'true'
+      }
     }
     extensionAzureDiskEncryptionConfig: {
       enabled: true
@@ -697,6 +700,10 @@ module modEncryptionKeyVault 'br/public:avm/res/key-vault/vault:0.3.4' = {
     enableVaultForDeployment: true
     enableVaultForTemplateDeployment: true
     enableVaultForDiskEncryption: true
+    networkAcls: {
+      defaultAction: 'Allow'
+      bypass: 'AzureServices'
+    }
     privateEndpoints: [
       {
         privateDnsZoneResourceIds: [
