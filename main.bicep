@@ -15,12 +15,12 @@ param pAppSubnetName string
 param pSqlSubnetName string
 param pStSubnetName string
 param pRouteTableName string
-// param pBastionName string
-// param pBastionPIPName string
-// param pVPNGatewayName string
-// param pVPNGatewayType string
-// param pVPNGatewaySkuName string
-// param pVPNGatewayPIPName string
+param pBastionName string
+param pBastionPIPName string
+param pVPNGatewayName string
+param pVPNGatewayType string
+param pVPNGatewaySkuName string
+param pVPNGatewayPIPName string
 param pCoreSecKeyVaultName string
 param pCoreEncryptionKeyVaultName string
 param pNICVMIP string
@@ -59,6 +59,7 @@ var vGatewaySubnetAddress = '${pHubVnetAddressPrefix}.1.0/24'
 var vAppGwSubnetAddress = '${pHubVnetAddressPrefix}.2.0/24'
 var vAzureFirewallSubnetAddress = '${pHubVnetAddressPrefix}.3.0/24'
 var vBastionSubnetAddress = '${pHubVnetAddressPrefix}.4.0/24'
+var vAzureFirewallAddress = '${pHubVnetAddressPrefix}.3.0'
 
 var vCoreVnetAddress = '${pCoreVnetAddressPrefix}.0.0/16'
 var vVMSubnetAddress = '${pCoreVnetAddressPrefix}.1.0/24'
@@ -79,6 +80,8 @@ var varKeyVaultEndpoint = 'privatelink${environment().suffixes.keyvaultDns}'
 var varStEndpoint = 'privatelink.blob.${environment().suffixes.storage}'
 var vAppGwId = resourceId('Microsoft.Network/applicationGateways',pAppGatewayName)
 var vRand = substring(uniqueString(resourceGroup().id),0,5)
+var vProdSqlServerName = '${pProdSqlServerName}${vRand}'
+var vDevSqlServerName = '${pDevSqlServerName}${vRand}'
 
 resource coreSecKeyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
   name: pCoreSecKeyVaultName
@@ -90,11 +93,9 @@ module modHubVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.1' = 
   name: 'HubVirtualNetwork'
   params: {
     name: pHubVnetName
-    // Required parameters
     addressPrefixes: [
       vHubVnetAddress
     ]
-    // Non-required parameters
     location: pLocation
     subnets: [
       {
@@ -137,7 +138,7 @@ module modCoreVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.1' =
         remotePeeringEnabled: true
         remotePeeringName: 'Core-to-Hub-Peering'
         remoteVirtualNetworkId: modHubVirtualNetwork.outputs.resourceId
-        useRemoteGateways: false
+        // useRemoteGateways: false
       }
     ]
     subnets: [
@@ -160,12 +161,10 @@ module modCoreVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.1' =
 module modDevSpokeVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.1' = {
   name: 'DevVirtualNetwork'
   params: {
-    // Required parameters
     addressPrefixes: [
       vDevVnetAddress
     ]
     name: pDevVnetName
-    // Non-required parameters
     location: pLocation
     peerings: [
       {
@@ -177,7 +176,7 @@ module modDevSpokeVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.
         remotePeeringEnabled: true
         remotePeeringName: 'Dev-to-Hub-Peering'
         remoteVirtualNetworkId: modHubVirtualNetwork.outputs.resourceId
-        useRemoteGateways: false
+        // useRemoteGateways: false
       }
     ]
     subnets: [
@@ -221,7 +220,7 @@ module modProdSpokeVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1
         remotePeeringEnabled: true
         remotePeeringName: 'Prod-to-Hub-Peering'
         remoteVirtualNetworkId: modHubVirtualNetwork.outputs.resourceId
-        useRemoteGateways: false
+        // useRemoteGateways: false
       }
     ]
     subnets: [
@@ -250,9 +249,7 @@ module modProdSpokeVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1
 module modRouteTable 'br/public:avm/res/network/route-table:0.2.1' = {
   name: 'RouteTable'
   params: {
-    // Required parameters
     name: pRouteTableName
-    // Non-required parameters
     location: pLocation
     routes: [
       {
@@ -294,26 +291,24 @@ module modRouteTable 'br/public:avm/res/network/route-table:0.2.1' = {
 module modNetworkSecurityGroup 'br/public:avm/res/network/network-security-group:0.1.2' = {
   name: 'NetworkSecurityGroup'
   params: {
-    // Required parameters
     name: 'DefaultNSG'
-    // Non-required parameters
     location: pLocation
-    securityRules: [
-      {
-        name: 'defaultRule'
-        properties: {
-          access: 'Allow'
-          description: 'description'
-          destinationAddressPrefix: '*'
-          destinationPortRange: '*'
-          direction: 'Inbound'
-          priority: 100
-          protocol: 'Tcp'
-          sourceAddressPrefix: '*'
-          sourcePortRange: '*'
-        }
-      }
-    ]
+    // securityRules: [
+    //   {
+    //     name: 'defaultRule'
+    //     properties: {
+    //       access: 'Allow'
+    //       description: 'description'
+    //       destinationAddressPrefix: '*'
+    //       destinationPortRange: '*'
+    //       direction: 'Inbound'
+    //       priority: 100
+    //       protocol: 'Tcp'
+    //       sourceAddressPrefix: '*'
+    //       sourcePortRange: '*'
+    //     }
+    //   }
+    // ]
   }
 }
 
@@ -322,9 +317,7 @@ module modNetworkSecurityGroup 'br/public:avm/res/network/network-security-group
 module modSqlPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' = {
   name: 'SqlPrivateDNSZone'
   params: {
-    // Required parameters
     name: varSqlEndpoint
-    // Non-required parameters
     virtualNetworkLinks: [
       {
         name: 'hub-link'
@@ -392,9 +385,7 @@ module modStPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' = 
 module modKvPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' = {
   name: 'KeyVaultPrivateDNSZone'
   params: {
-    // Required parameters
     name: varKeyVaultEndpoint
-    // Non-required parameters
     virtualNetworkLinks: [
       {
         name: 'hub-link'
@@ -461,34 +452,34 @@ module modAspPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' =
 
 // BASTION //
 
-// module modBastionHost 'br/public:avm/res/network/bastion-host:0.1.1' = {
-//   name: 'Bastion'
-//   params: {
-//     name: pBastionName
-//     vNetId: modHubVirtualNetwork.outputs.resourceId
-//     location: pLocation
-//     skuName: 'Standard'
-//     publicIPAddressObject: {
-//       allocationMethod: 'Static'
-//       name: pBastionPIPName
-//       skuName: 'Standard'
-//     }
-//   }
-// }
+module modBastionHost 'br/public:avm/res/network/bastion-host:0.1.1' = {
+  name: 'Bastion'
+  params: {
+    name: pBastionName
+    vNetId: modHubVirtualNetwork.outputs.resourceId
+    location: pLocation
+    skuName: 'Standard'
+    publicIPAddressObject: {
+      allocationMethod: 'Static'
+      name: pBastionPIPName
+      skuName: 'Standard'
+    }
+  }
+}
 
-// // VPN Gateway //
+// VPN Gateway //
 
-// module modVirtualNetworkGateway 'br/public:avm/res/network/virtual-network-gateway:0.1.0' = {
-//   name: 'VPNGateway'
-//   params: {
-//     gatewayType: pVPNGatewayType
-//     name: pVPNGatewayName
-//     skuName: pVPNGatewaySkuName
-//     vNetResourceId: modHubVirtualNetwork.outputs.resourceId
-//     location: pLocation
-//     gatewayPipName: pVPNGatewayPIPName
-//   }
-// }
+module modVirtualNetworkGateway 'br/public:avm/res/network/virtual-network-gateway:0.1.0' = {
+  name: 'VPNGateway'
+  params: {
+    gatewayType: pVPNGatewayType
+    name: pVPNGatewayName
+    skuName: pVPNGatewaySkuName
+    vNetResourceId: modHubVirtualNetwork.outputs.resourceId
+    location: pLocation
+    gatewayPipName: pVPNGatewayPIPName
+  }
+}
 
 // VM //
 
@@ -524,9 +515,9 @@ module modCoreVirtualMachine 'br/public:avm/res/compute/virtual-machine:0.2.1' =
     ]
     osDisk: {
       createOption: 'fromImage'
-      diskSizeGB: '256'
+      diskSizeGB: '128'
       managedDisk: {
-        storageAccountType: 'Premium_LRS'
+        storageAccountType: 'Standard_LRS'
       }
     }
     backupPolicyName: 'DefaultPolicy'
@@ -728,6 +719,7 @@ module modDevAppServicePlan 'br/public:avm/res/web/serverfarm:0.1.0' = {
     }
     kind: 'Linux'
     location: pLocation
+    reserved: true
   }
 }
 
@@ -750,13 +742,23 @@ module modDevAppService 'br/public:avm/res/web/site:0.2.0' = {
     kind: 'app'
     name: pDevAppServiceName
     serverFarmResourceId: modDevAppServicePlan.outputs.resourceId
+    appInsightResourceId: modAppInsights.outputs.resourceId
     location: pLocation
-    httpsOnly: true
     siteConfig: {
-      metadata: [
+      alwaysOn: true
+      linuxFxVersion: 'DOTNETCORE|7.0'
+      appSettings:[
         {
-          name: 'Current_Stack'
-          value: 'DOTNETCORE|7.0'
+          name:'APPINSIGHTS_INSTRUMENTATIONKEY'
+          value:modAppInsights.outputs.instrumentationKey
+        }
+        {
+          name:'ApplicationInsightsAgent_EXTENSION_VERSION'
+          value:'~3'
+        }
+        {
+          name:'XDT_MicrosoftApplicationInsights_Mode'
+          value:'default'
         }
       ]
     }
@@ -777,13 +779,23 @@ module modProdAppService 'br/public:avm/res/web/site:0.2.0' = {
     kind: 'app'
     name: pProdAppServiceName
     serverFarmResourceId: modProdAppServicePlan.outputs.resourceId
+    appInsightResourceId: modAppInsights.outputs.resourceId
     location: pLocation
-    httpsOnly: true
     siteConfig: {
-      metadata: [
+      alwaysOn: true
+      linuxFxVersion: 'DOTNETCORE|7.0'
+      appSettings:[
         {
-          name: 'Current_Stack'
-          value: 'DOTNETCORE|7.0'
+          name:'APPINSIGHTS_INSTRUMENTATIONKEY'
+          value:modAppInsights.outputs.instrumentationKey
+        }
+        {
+          name:'ApplicationInsightsAgent_EXTENSION_VERSION'
+          value:'~3'
+        }
+        {
+          name:'XDT_MicrosoftApplicationInsights_Mode'
+          value:'default'
         }
       ]
     }
@@ -801,12 +813,11 @@ module modProdAppService 'br/public:avm/res/web/site:0.2.0' = {
 module modAppInsights 'br/public:avm/res/insights/component:0.2.0' = {
   name: 'appInsights'
   params: {
-    // Required parameters
     name: 'App-Insights'
     workspaceResourceId: modLogAnalyticsWorkspace.outputs.resourceId
-    // Non-required parameters
     location: pLocation
     kind: 'web'
+    applicationType: 'web'
   }
 }
 
@@ -864,12 +875,21 @@ module modLogAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspac
   }
 }
 
+// <--- SOURCE CONTROL ---> //
+
+module modsrcctrl './modules/srcctrl.bicep' = {
+  name: 'src-control'
+  params: {
+    paramsrcctrlname: '${modDevAppService.outputs.name}/web'
+  }
+}
+
 // SQL SERVER //
 
 module modProdSqlServer 'br/public:avm/res/sql/server:0.1.5' = {
   name: 'ProdSQLServer'
   params: {
-    name: '${pProdSqlServerName}${vRand}'
+    name: vProdSqlServerName
     administratorLogin: 'usersandy'
     administratorLoginPassword: 'GoodbyeMonkey987!'
     location: pLocation
@@ -886,7 +906,9 @@ module modProdSqlServer 'br/public:avm/res/sql/server:0.1.5' = {
         privateDnsZoneResourceIds: [
           modSqlPrivateDnsZone.outputs.resourceId
         ]
+        service: 'sqlServer'
         subnetResourceId: modProdSpokeVirtualNetwork.outputs.subnetResourceIds[1]
+        customNetworkInterfaceName: 'pip-${vProdSqlServerName}'
       }
     ]
   }
@@ -895,7 +917,7 @@ module modProdSqlServer 'br/public:avm/res/sql/server:0.1.5' = {
 module modDevSqlServer 'br/public:avm/res/sql/server:0.1.5' = {
   name: 'DevSQLServer'
   params: {
-    name: '${pDevSqlServerName}${vRand}'
+    name: vDevSqlServerName
     administratorLogin: 'sandyuser1'
     administratorLoginPassword: 'HelloMonkey123!'
     location: pLocation
@@ -912,7 +934,9 @@ module modDevSqlServer 'br/public:avm/res/sql/server:0.1.5' = {
         privateDnsZoneResourceIds: [
           modSqlPrivateDnsZone.outputs.resourceId
         ]
+        service: 'sqlServer'
         subnetResourceId: modDevSpokeVirtualNetwork.outputs.subnetResourceIds[1]
+        customNetworkInterfaceName: 'pip-${vDevSqlServerName}'
       }
     ]
   }
@@ -932,6 +956,7 @@ module modProdStorageAccount 'br/public:avm/res/storage/storage-account:0.6.2' =
         ]
         service: 'blob'
         subnetResourceId: modProdSpokeVirtualNetwork.outputs.subnetResourceIds[2]
+        customNetworkInterfaceName: 'pip-${pProdStName}'
       }
     ]
   }
@@ -951,18 +976,9 @@ module modDevStorageAccount 'br/public:avm/res/storage/storage-account:0.6.2' = 
         ]
         service: 'blob'
         subnetResourceId: modDevSpokeVirtualNetwork.outputs.subnetResourceIds[2]
+        customNetworkInterfaceName: 'pip-${pDevStName}'
       }
     ]
-  }
-}
-
-// <--- SOURCE CONTROL ---> //
-
-module modsrcctrl './modules/srcctrl.bicep' = {
-  name: 'src-control'
-  // dependsOn: [modDevAppService]
-  params: {
-    paramsrcctrlname: '${modDevAppService.outputs.name}/web'
   }
 }
 
@@ -1090,18 +1106,10 @@ module azureFirewall './ResourceModules/modules/network/azure-firewall/main.bice
     name: pAzureFirewallName
     location: pLocation
     firewallPolicyId: firewallPolicy.outputs.resourceId
+    hubIPAddresses: {
+      privateIPAddress: vAzureFirewallAddress
+    }
     publicIPAddressObject: {
-      diagnosticSettings: [
-        {
-          metricCategories: [
-            {
-              category: 'AllMetrics'
-            }
-          ]
-          name: 'customSetting'
-          workspaceResourceId: modLogAnalyticsWorkspace.outputs.resourceId
-        }
-      ]
       name: pAzureFirewallPIPName
       publicIPAllocationMethod: 'Static'
       publicIPPrefixResourceId: ''
@@ -1109,6 +1117,17 @@ module azureFirewall './ResourceModules/modules/network/azure-firewall/main.bice
       skuTier: 'Regional'
     }
     vNetId: modHubVirtualNetwork.outputs.resourceId
+    diagnosticSettings: [
+      {
+        metricCategories: [
+          {
+            category: 'AllMetrics'
+          }
+        ]
+        name: 'customSetting'
+        workspaceResourceId: modLogAnalyticsWorkspace.outputs.resourceId  
+      }
+    ]
   }
 }
 
