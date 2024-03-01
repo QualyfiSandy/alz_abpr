@@ -691,6 +691,24 @@ module modEncryptionKeyVault 'br/public:avm/res/key-vault/vault:0.3.4' = {
     enableVaultForDeployment: true
     enableVaultForTemplateDeployment: true
     enableVaultForDiskEncryption: true
+    accessPolicies: [
+      {
+        objectId: 'cbbcb094-cb98-49be-b3e6-f1059ec8b823'
+        tenantId: 'd4003661-f87e-4237-9a9b-8b9c31ba2467'
+        permissions: {
+          keys: [
+            'get'
+            'list'
+            'backup'
+          ]
+          secrets: [
+            'get'
+            'list'
+            'backup'
+          ]
+        }
+      }
+    ]
     networkAcls: {
       defaultAction: 'Allow'
       bypass: 'AzureServices'
