@@ -733,6 +733,7 @@ module modProdAppServicePlan 'br/public:avm/res/web/serverfarm:0.1.0' = {
     }
     kind: 'Linux'
     location: pLocation
+    reserved: true
   }
 }
 
