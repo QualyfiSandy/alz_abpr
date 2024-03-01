@@ -870,8 +870,8 @@ module modLogAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspac
       }
     ]
     location: pLocation
-    publicNetworkAccessForIngestion: 'Disabled'
-    publicNetworkAccessForQuery: 'Disabled'
+    publicNetworkAccessForIngestion: 'Enabled'
+    publicNetworkAccessForQuery: 'Enabled'
     useResourcePermissions: true
   }
 }
