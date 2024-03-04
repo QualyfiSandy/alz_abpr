@@ -558,8 +558,7 @@ module solution 'br/public:avm/res/operations-management/solution:0.1.2' = {
   name: 'VMInsights'
   params: {
     logAnalyticsWorkspaceName: modLogAnalyticsWorkspace.outputs.name
-    name: 'VMInsights'
-    location: pLocation
+    name: 'AzureAutomation'
     product: 'OMSGallery/VMInsights'
     publisher: 'Microsoft'
   }
@@ -585,7 +584,7 @@ module dataCollectionRule 'br/public:avm/res/insights/data-collection-rule:0.1.2
       }
       {
         destinations: [
-          modLogAnalyticsWorkspace.name
+          modLogAnalyticsWorkspace.outputs.name
         ]
         streams: [
           'Microsoft-Event'
@@ -670,7 +669,7 @@ module dataCollectionRule 'br/public:avm/res/insights/data-collection-rule:0.1.2
       }
       logAnalytics: [
         {
-          name: modLogAnalyticsWorkspace.name
+          name: modLogAnalyticsWorkspace.outputs.name
           workspaceResourceId: modLogAnalyticsWorkspace.outputs.resourceId
         }
       ]
