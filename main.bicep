@@ -523,7 +523,7 @@ module modCoreVirtualMachine 'br/public:avm/res/compute/virtual-machine:0.2.1' =
     backupPolicyName: 'DefaultPolicy'
     backupVaultName: modRecoveryServiceVault.outputs.name
     backupVaultResourceGroup: modRecoveryServiceVault.outputs.resourceGroupName
-    enableAutomaticUpdates: false
+    enableAutomaticUpdates: true
     encryptionAtHost: false
     extensionAntiMalwareConfig: {
       enabled: true
