@@ -898,11 +898,9 @@ module modLogAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspac
 
 module modsrcctrl './modules/srcctrl.bicep' = {
   name: 'src-control'
-  dependsOn: [
-    applicationGateway
-  ]
   params: {
-    paramsrcctrlname: '${modDevAppService.outputs.name}/web'
+    paramsrcctrlname: 'web'
+    pAppServiceName: modProdAppService.outputs.name
   }
 }
 
