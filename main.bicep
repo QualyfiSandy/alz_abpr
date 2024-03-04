@@ -17,10 +17,10 @@ param pStSubnetName string
 param pRouteTableName string
 param pBastionName string
 param pBastionPIPName string
-// param pVPNGatewayName string
-// param pVPNGatewayType string
-// param pVPNGatewaySkuName string
-// param pVPNGatewayPIPName string
+param pVPNGatewayName string
+param pVPNGatewayType string
+param pVPNGatewaySkuName string
+param pVPNGatewayPIPName string
 param pCoreSecKeyVaultName string
 param pCoreEncryptionKeyVaultName string
 param pNICVMIP string
@@ -467,19 +467,19 @@ module modBastionHost 'br/public:avm/res/network/bastion-host:0.1.1' = {
   }
 }
 
-// // VPN Gateway //
+// VPN Gateway //
 
-// module modVirtualNetworkGateway 'br/public:avm/res/network/virtual-network-gateway:0.1.0' = {
-//   name: 'VPNGateway'
-//   params: {
-//     gatewayType: pVPNGatewayType
-//     name: pVPNGatewayName
-//     skuName: pVPNGatewaySkuName
-//     vNetResourceId: modHubVirtualNetwork.outputs.resourceId
-//     location: pLocation
-//     gatewayPipName: pVPNGatewayPIPName
-//   }
-// }
+module modVirtualNetworkGateway 'br/public:avm/res/network/virtual-network-gateway:0.1.0' = {
+  name: 'VPNGateway'
+  params: {
+    gatewayType: pVPNGatewayType
+    name: pVPNGatewayName
+    skuName: pVPNGatewaySkuName
+    vNetResourceId: modHubVirtualNetwork.outputs.resourceId
+    location: pLocation
+    gatewayPipName: pVPNGatewayPIPName
+  }
+}
 
 // VM //
 
