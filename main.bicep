@@ -523,7 +523,7 @@ module modCoreVirtualMachine 'br/public:avm/res/compute/virtual-machine:0.2.1' =
     backupPolicyName: 'DefaultPolicy'
     backupVaultName: modRecoveryServiceVault.outputs.name
     backupVaultResourceGroup: modRecoveryServiceVault.outputs.resourceGroupName
-    enableAutomaticUpdates: true
+    enableAutomaticUpdates: false
     encryptionAtHost: false
     extensionAntiMalwareConfig: {
       enabled: true
@@ -569,7 +569,7 @@ module solution 'br/public:avm/res/operations-management/solution:0.1.2' = {
 module dataCollectionRule 'br/public:avm/res/insights/data-collection-rule:0.1.2' = {
   name: 'DataCollectionRule'
   params: {
-    name: 'Data-Collection-Rule'
+    name: 'MSVMI-DataCollectionRule'
     description: 'Collecting Windows-specific performance counters and Windows Event Logs'
     kind: 'Windows'
     location: pLocation
@@ -663,6 +663,7 @@ module dataCollectionRule 'br/public:avm/res/insights/data-collection-rule:0.1.2
         }
       ]
     }
+    dataCollectionEndpointId: dataCollectionEndpoint.outputs.resourceId
     destinations: {
       azureMonitorMetrics: {
         name: 'VMInsightsPerf-Logs-Dest'
@@ -674,6 +675,18 @@ module dataCollectionRule 'br/public:avm/res/insights/data-collection-rule:0.1.2
         }
       ]
     }
+  }
+}
+
+// DATA COLLECTION ENDPOINT //
+
+module dataCollectionEndpoint 'br/public:avm/res/insights/data-collection-endpoint:0.1.2' = {
+  name: 'DataCollectionEndpoint'
+  params: {
+    name: 'VMDCE'
+    kind: 'Windows'
+    location: pLocation
+    publicNetworkAccess: 'Enabled'
   }
 }
 
