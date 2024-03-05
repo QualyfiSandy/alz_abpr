@@ -564,6 +564,8 @@ module solution 'br/public:avm/res/operations-management/solution:0.1.2' = {
   }
 }
 
+// VM INSIGHTS DATA COLLECTION RULE //
+
 module MSVMI_PerfandDa_LandingZone 'br/public:avm/res/insights/data-collection-rule:0.1.2' = {
   name: 'VMInsights-DCR'
   params: {
@@ -595,6 +597,7 @@ module MSVMI_PerfandDa_LandingZone 'br/public:avm/res/insights/data-collection-r
         }
       ]
     }
+    dataCollectionEndpointId: dataCollectionEndpoint.outputs.resourceId
     destinations: {
       logAnalytics: [
         {
@@ -747,6 +750,17 @@ module dataCollectionEndpoint 'br/public:avm/res/insights/data-collection-endpoi
     kind: 'Windows'
     location: pLocation
     publicNetworkAccess: 'Enabled'
+  }
+}
+
+// DCR ASSOCIATION MODULE //
+
+module DCRAssociation './modules/dcr_association.bicep' = {
+  name: 'DCR-Association'
+  params: {
+    pDCREndpointId: dataCollectionEndpoint.outputs.resourceId
+    pDCRId: MSVMI_PerfandDa_LandingZone.outputs.resourceId
+    pVMName: pVMName
   }
 }
 
