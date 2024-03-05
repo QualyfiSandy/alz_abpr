@@ -757,6 +757,9 @@ module dataCollectionEndpoint 'br/public:avm/res/insights/data-collection-endpoi
 
 module DCRAssociation './modules/dcr_association.bicep' = {
   name: 'DCR-Association'
+  dependsOn: [
+    modCoreVirtualMachine
+  ]
   params: {
     pDCREndpointId: dataCollectionEndpoint.outputs.resourceId
     pDCRId: MSVMI_PerfandDa_LandingZone.outputs.resourceId
