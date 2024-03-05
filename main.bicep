@@ -564,119 +564,179 @@ module solution 'br/public:avm/res/operations-management/solution:0.1.2' = {
   }
 }
 
-// DATA COLLECTION RULE //
-
-module dataCollectionRule 'br/public:avm/res/insights/data-collection-rule:0.1.2' = {
-  name: 'DataCollectionRule'
+module MSVMI_PerfandDa_LandingZone 'br/public:avm/res/insights/data-collection-rule:0.1.2' = {
+  name: 'VMInsights-DCR'
   params: {
-    name: 'MSVMI-DataCollectionRule'
-    description: 'Collecting Windows-specific performance counters and Windows Event Logs'
-    kind: 'Windows'
     location: pLocation
-    dataFlows: [
-      {
-        destinations: [
-          'VMInsightsPerf-Logs-Dest'
-        ]
-        streams: [
-          'Microsoft-InsightsMetrics'
-        ]
-      }
-      {
-        destinations: [
-          modLogAnalyticsWorkspace.outputs.name
-        ]
-        streams: [
-          'Microsoft-Event'
-        ]
-      }
-    ]
+    name: 'MSVMI-PerfandDa-${pVMName}'
+    description: 'Data collection rule for VM Insights.'
     dataSources: {
       performanceCounters: [
         {
-          counterSpecifiers: [
-            '\\LogicalDisk(_Total)\\% Disk Read Time'
-            '\\LogicalDisk(_Total)\\% Disk Time'
-            '\\LogicalDisk(_Total)\\% Disk Write Time'
-            '\\LogicalDisk(_Total)\\% Free Space'
-            '\\LogicalDisk(_Total)\\% Idle Time'
-            '\\LogicalDisk(_Total)\\Avg. Disk Queue Length'
-            '\\LogicalDisk(_Total)\\Avg. Disk Read Queue Length'
-            '\\LogicalDisk(_Total)\\Avg. Disk sec/Read'
-            '\\LogicalDisk(_Total)\\Avg. Disk sec/Transfer'
-            '\\LogicalDisk(_Total)\\Avg. Disk sec/Write'
-            '\\LogicalDisk(_Total)\\Avg. Disk Write Queue Length'
-            '\\LogicalDisk(_Total)\\Disk Bytes/sec'
-            '\\LogicalDisk(_Total)\\Disk Read Bytes/sec'
-            '\\LogicalDisk(_Total)\\Disk Reads/sec'
-            '\\LogicalDisk(_Total)\\Disk Transfers/sec'
-            '\\LogicalDisk(_Total)\\Disk Write Bytes/sec'
-            '\\LogicalDisk(_Total)\\Disk Writes/sec'
-            '\\LogicalDisk(_Total)\\Free Megabytes'
-            '\\Memory\\% Committed Bytes In Use'
-            '\\Memory\\Available Bytes'
-            '\\Memory\\Cache Bytes'
-            '\\Memory\\Committed Bytes'
-            '\\Memory\\Page Faults/sec'
-            '\\Memory\\Pages/sec'
-            '\\Memory\\Pool Nonpaged Bytes'
-            '\\Memory\\Pool Paged Bytes'
-            '\\Network Interface(*)\\Bytes Received/sec'
-            '\\Network Interface(*)\\Bytes Sent/sec'
-            '\\Network Interface(*)\\Bytes Total/sec'
-            '\\Network Interface(*)\\Packets Outbound Errors'
-            '\\Network Interface(*)\\Packets Received Errors'
-            '\\Network Interface(*)\\Packets Received/sec'
-            '\\Network Interface(*)\\Packets Sent/sec'
-            '\\Network Interface(*)\\Packets/sec'
-            '\\Process(_Total)\\Handle Count'
-            '\\Process(_Total)\\Thread Count'
-            '\\Process(_Total)\\Working Set'
-            '\\Process(_Total)\\Working Set - Private'
-            '\\Processor Information(_Total)\\% Privileged Time'
-            '\\Processor Information(_Total)\\% Processor Time'
-            '\\Processor Information(_Total)\\% User Time'
-            '\\Processor Information(_Total)\\Processor Frequency'
-            '\\System\\Context Switches/sec'
-            '\\System\\Processes'
-            '\\System\\Processor Queue Length'
-            '\\System\\System Up Time'
-          ]
-          name: 'perfCounterDataSource60'
-          samplingFrequencyInSeconds: 60
+          name: 'VMInsightsPerfCounters'
           streams: [
             'Microsoft-InsightsMetrics'
           ]
+          scheduledTransferPeriod: 'PT1M'
+          samplingFrequencyInSeconds: 60
+          counterSpecifiers: [
+            '\\VmInsights\\DetailedMetrics'
+          ]
         }
       ]
-      windowsEventLogs: [
+      extensions: [
         {
-          name: 'WinLogEvents'
           streams: [
-            'Microsoft-Event'
+            'Microsoft-ServiceMap'
           ]
-          xPathQueries: [
-            'Application!*[System[(Level=1 or Level=2 or Level=3 or Level=4 or Level=0 or Level=5)]]'
-            'Security!*[System[(band(Keywords,13510798882111488))]]'
-            'System!*[System[(Level=1 or Level=2 or Level=3 or Level=4 or Level=0 or Level=5)]]'
-          ]
+          extensionName: 'DependencyAgent'
+          extensionSettings: {}
+          name: 'DependencyAgentDataSource'
         }
       ]
     }
-    dataCollectionEndpointId: dataCollectionEndpoint.outputs.resourceId
     destinations: {
-      azureMonitorMetrics: {
-        name: 'VMInsightsPerf-Logs-Dest'
-      }
       logAnalytics: [
         {
-          name: modLogAnalyticsWorkspace.outputs.name
           workspaceResourceId: modLogAnalyticsWorkspace.outputs.resourceId
+          name: 'VMInsightsPerf-Logs-Dest'
         }
       ]
     }
+    dataFlows: [
+      {
+        streams: [
+          'Microsoft-InsightsMetrics'
+        ]
+        destinations: [
+          'VMInsightsPerf-Logs-Dest'
+        ]
+      }
+      {
+        streams: [
+          'Microsoft-ServiceMap'
+        ]
+        destinations: [
+          'VMInsightsPerf-Logs-Dest'
+        ]
+      }
+    ]
   }
 }
+
+// DATA COLLECTION RULE //
+
+// module dataCollectionRule 'br/public:avm/res/insights/data-collection-rule:0.1.2' = {
+//   name: 'DataCollectionRule'
+//   params: {
+//     name: 'MSVMI-DataCollectionRule'
+//     description: 'Collecting Windows-specific performance counters and Windows Event Logs'
+//     kind: 'Windows'
+//     location: pLocation
+//     dataFlows: [
+//       {
+//         destinations: [
+//           'VMInsightsPerf-Logs-Dest'
+//         ]
+//         streams: [
+//           'Microsoft-InsightsMetrics'
+//         ]
+//       }
+//       {
+//         destinations: [
+//           modLogAnalyticsWorkspace.outputs.name
+//         ]
+//         streams: [
+//           'Microsoft-Event'
+//         ]
+//       }
+//     ]
+//     dataSources: {
+//       performanceCounters: [
+//         {
+//           counterSpecifiers: [
+//             '\\LogicalDisk(_Total)\\% Disk Read Time'
+//             '\\LogicalDisk(_Total)\\% Disk Time'
+//             '\\LogicalDisk(_Total)\\% Disk Write Time'
+//             '\\LogicalDisk(_Total)\\% Free Space'
+//             '\\LogicalDisk(_Total)\\% Idle Time'
+//             '\\LogicalDisk(_Total)\\Avg. Disk Queue Length'
+//             '\\LogicalDisk(_Total)\\Avg. Disk Read Queue Length'
+//             '\\LogicalDisk(_Total)\\Avg. Disk sec/Read'
+//             '\\LogicalDisk(_Total)\\Avg. Disk sec/Transfer'
+//             '\\LogicalDisk(_Total)\\Avg. Disk sec/Write'
+//             '\\LogicalDisk(_Total)\\Avg. Disk Write Queue Length'
+//             '\\LogicalDisk(_Total)\\Disk Bytes/sec'
+//             '\\LogicalDisk(_Total)\\Disk Read Bytes/sec'
+//             '\\LogicalDisk(_Total)\\Disk Reads/sec'
+//             '\\LogicalDisk(_Total)\\Disk Transfers/sec'
+//             '\\LogicalDisk(_Total)\\Disk Write Bytes/sec'
+//             '\\LogicalDisk(_Total)\\Disk Writes/sec'
+//             '\\LogicalDisk(_Total)\\Free Megabytes'
+//             '\\Memory\\% Committed Bytes In Use'
+//             '\\Memory\\Available Bytes'
+//             '\\Memory\\Cache Bytes'
+//             '\\Memory\\Committed Bytes'
+//             '\\Memory\\Page Faults/sec'
+//             '\\Memory\\Pages/sec'
+//             '\\Memory\\Pool Nonpaged Bytes'
+//             '\\Memory\\Pool Paged Bytes'
+//             '\\Network Interface(*)\\Bytes Received/sec'
+//             '\\Network Interface(*)\\Bytes Sent/sec'
+//             '\\Network Interface(*)\\Bytes Total/sec'
+//             '\\Network Interface(*)\\Packets Outbound Errors'
+//             '\\Network Interface(*)\\Packets Received Errors'
+//             '\\Network Interface(*)\\Packets Received/sec'
+//             '\\Network Interface(*)\\Packets Sent/sec'
+//             '\\Network Interface(*)\\Packets/sec'
+//             '\\Process(_Total)\\Handle Count'
+//             '\\Process(_Total)\\Thread Count'
+//             '\\Process(_Total)\\Working Set'
+//             '\\Process(_Total)\\Working Set - Private'
+//             '\\Processor Information(_Total)\\% Privileged Time'
+//             '\\Processor Information(_Total)\\% Processor Time'
+//             '\\Processor Information(_Total)\\% User Time'
+//             '\\Processor Information(_Total)\\Processor Frequency'
+//             '\\System\\Context Switches/sec'
+//             '\\System\\Processes'
+//             '\\System\\Processor Queue Length'
+//             '\\System\\System Up Time'
+//           ]
+//           name: 'perfCounterDataSource60'
+//           samplingFrequencyInSeconds: 60
+//           streams: [
+//             'Microsoft-InsightsMetrics'
+//           ]
+//         }
+//       ]
+//       windowsEventLogs: [
+//         {
+//           name: 'WinLogEvents'
+//           streams: [
+//             'Microsoft-Event'
+//           ]
+//           xPathQueries: [
+//             'Application!*[System[(Level=1 or Level=2 or Level=3 or Level=4 or Level=0 or Level=5)]]'
+//             'Security!*[System[(band(Keywords,13510798882111488))]]'
+//             'System!*[System[(Level=1 or Level=2 or Level=3 or Level=4 or Level=0 or Level=5)]]'
+//           ]
+//         }
+//       ]
+//     }
+//     dataCollectionEndpointId: dataCollectionEndpoint.outputs.resourceId
+//     destinations: {
+//       azureMonitorMetrics: {
+//         name: 'VMInsightsPerf-Logs-Dest'
+//       }
+//       logAnalytics: [
+//         {
+//           name: modLogAnalyticsWorkspace.outputs.name
+//           workspaceResourceId: modLogAnalyticsWorkspace.outputs.resourceId
+//         }
+//       ]
+//     }
+//   }
+// }
 
 // DATA COLLECTION ENDPOINT //
 
