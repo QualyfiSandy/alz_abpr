@@ -756,7 +756,7 @@ module dataCollectionEndpoint 'br/public:avm/res/insights/data-collection-endpoi
 // DCR ASSOCIATION MODULE //
 
 module DCRAssociation './modules/dcr_association.bicep' = {
-  name: 'DCR-Association'
+  name: 'configurationAccessEndpoint'
   dependsOn: [
     modCoreVirtualMachine
   ]
