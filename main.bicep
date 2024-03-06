@@ -761,7 +761,7 @@ module DCRAssociation './modules/dcr_association.bicep' = {
     modCoreVirtualMachine
   ]
   params: {
-    pDCREndpointId: dataCollectionEndpoint.outputs.resourceId
+    // pDCREndpointId: dataCollectionEndpoint.outputs.resourceId
     pDCRId: MSVMI_PerfandDa_LandingZone.outputs.resourceId
     pVMName: pVMName
   }
