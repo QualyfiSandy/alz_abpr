@@ -48,7 +48,7 @@ param pAppGatewayPIPName string
 param pAzureFirewallName string
 param pAzureFirewallPIPName string
 param pAzureFirewallPolicyName string
-param pTime string = utcNow()
+param pTime string = utcNow('d')
 param pTagHub string
 param pTagCore string
 param pTagDev string
