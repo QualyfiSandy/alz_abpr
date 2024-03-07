@@ -61,6 +61,7 @@ param pProdSQLPrivEndpointName string
 param pDevSQLPrivEndpointName string
 param pProdStPrivEndpointName string
 param pDevStPrivEndpointName string
+param pDeployUserName string
 
 param pHubVnetAddressPrefix string
 param pCoreVnetAddressPrefix string
@@ -106,7 +107,7 @@ module modHubVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.1' = 
     tags: {
       Spoke: pTagHub
       LastDeployed: pTime
-      Owner: 'Sandy'
+      Owner: pDeployUserName
     }
     name: pHubVnetName
     addressPrefixes: [
