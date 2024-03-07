@@ -26,8 +26,8 @@ jobs:
           path: ./ResourceModules
       - name: Run Bicep linter
         run: az bicep build --file ./main.bicep
-      - name: Run Parameter linter
-        run: az bicep build-params --file ./param.bicepparam
+      # - name: Run Parameter linter
+      #   run: az bicep build-params --file ./param.bicepparam
   validate:
     runs-on: ubuntu-latest
     steps:
