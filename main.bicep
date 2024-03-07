@@ -48,6 +48,19 @@ param pAppGatewayPIPName string
 param pAzureFirewallName string
 param pAzureFirewallPIPName string
 param pAzureFirewallPolicyName string
+param pTime string = utcNow()
+param pTagHub string
+param pTagCore string
+param pTagDev string
+param pTagProd string
+param pTagGlobal string
+param pKeyVaultPrivEndpointName string
+param pDevAppServicePrivEndpointName string
+param pProdAppServicePrivEndpointName string
+param pProdSQLPrivEndpointName string
+param pDevSQLPrivEndpointName string
+param pProdStPrivEndpointName string
+param pDevStPrivEndpointName string
 
 param pHubVnetAddressPrefix string
 param pCoreVnetAddressPrefix string
@@ -83,15 +96,18 @@ var vRand = substring(uniqueString(resourceGroup().id),0,5)
 var vProdSqlServerName = '${pProdSqlServerName}${vRand}'
 var vDevSqlServerName = '${pDevSqlServerName}${vRand}'
 
-resource coreSecKeyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
-  name: pCoreSecKeyVaultName
-}
+resource coreSecKeyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {name: pCoreSecKeyVaultName}
 
 // VIRTUAL NETWORKS //
 
 module modHubVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.1' = {
   name: 'HubVirtualNetwork'
   params: {
+    tags: {
+      Spoke: pTagHub
+      LastDeployed: pTime
+      Owner: 'Sandy'
+    }
     name: pHubVnetName
     addressPrefixes: [
       vHubVnetAddress
@@ -101,18 +117,38 @@ module modHubVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.1' = 
       {
         addressPrefix: vGatewaySubnetAddress
         name: pGatewaySubnetName
+        tags: {
+          Spoke: pTagHub
+          LastDeployed: pTime
+          Owner: 'Sandy'
+        }
       }
       {
         addressPrefix: vAppGwSubnetAddress
         name: pAppGwSubnetName
+        tags: {
+          Spoke: pTagHub
+          LastDeployed: pTime
+          Owner: 'Sandy'
+        }
       }
       {
         addressPrefix: vAzureFirewallSubnetAddress
         name: pAzureFirewallSubnetName
+        tags: {
+          Spoke: pTagHub
+          LastDeployed: pTime
+          Owner: 'Sandy'
+        }
       }
       {
         addressPrefix: vBastionSubnetAddress
         name: pBastionSubnetName
+        tags: {
+          Spoke: pTagHub
+          LastDeployed: pTime
+          Owner: 'Sandy'
+        }
       }
     ]
   }
@@ -121,13 +157,16 @@ module modHubVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.1' = 
 module modCoreVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.1' = {
   name: 'CoreVirtualNetwork'
   params: {
-    // Required parameters
     addressPrefixes: [
       vCoreVnetAddress
     ]
     name: pCoreVnetName
-    // Non-required parameters
     location: pLocation
+    tags: {
+      Spoke: pTagCore
+      LastDeployed: pTime
+      Owner: 'Sandy'
+    }
     peerings: [
       {
         allowForwardedTraffic: true
@@ -138,7 +177,6 @@ module modCoreVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.1' =
         remotePeeringEnabled: true
         remotePeeringName: 'Core-to-Hub-Peering'
         remoteVirtualNetworkId: modHubVirtualNetwork.outputs.resourceId
-        // useRemoteGateways: false
       }
     ]
     subnets: [
@@ -147,12 +185,22 @@ module modCoreVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.1' =
         name: pVMSubnetName
         networkSecurityGroupResourceId: modNetworkSecurityGroup.outputs.resourceId
         routeTableResourceId: modRouteTable.outputs.resourceId
+        tags: {
+          Spoke: pTagCore
+          LastDeployed: pTime
+          Owner: 'Sandy'
+        }
       }
       {
         addressPrefix: vKVSubnetAddress
         name: pKVSubnetName
         networkSecurityGroupResourceId: modNetworkSecurityGroup.outputs.resourceId
         routeTableResourceId: modRouteTable.outputs.resourceId
+        tags: {
+          Spoke: pTagCore
+          LastDeployed: pTime
+          Owner: 'Sandy'
+        }
       }
     ]
   }
@@ -166,6 +214,11 @@ module modDevSpokeVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.
     ]
     name: pDevVnetName
     location: pLocation
+    tags: {
+      Spoke: pTagDev
+      LastDeployed: pTime
+      Owner: 'Sandy'
+    }
     peerings: [
       {
         allowForwardedTraffic: true
@@ -176,7 +229,6 @@ module modDevSpokeVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.
         remotePeeringEnabled: true
         remotePeeringName: 'Dev-to-Hub-Peering'
         remoteVirtualNetworkId: modHubVirtualNetwork.outputs.resourceId
-        // useRemoteGateways: false
       }
     ]
     subnets: [
@@ -185,18 +237,33 @@ module modDevSpokeVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.
         addressPrefix: vDevAspAddress
         networkSecurityGroupResourceId: modNetworkSecurityGroup.outputs.resourceId
         routeTableResourceId: modRouteTable.outputs.resourceId
+        tags: {
+          Spoke: pTagDev
+          LastDeployed: pTime
+          Owner: 'Sandy'
+        }
       }
       {
         name: pSqlSubnetName
         addressPrefix: vDevSqlAddress
         networkSecurityGroupResourceId: modNetworkSecurityGroup.outputs.resourceId
         routeTableResourceId: modRouteTable.outputs.resourceId
+        tags: {
+          Spoke: pTagDev
+          LastDeployed: pTime
+          Owner: 'Sandy'
+        }
       }
       {
         name: pStSubnetName
         addressPrefix: vDevStAddress
         networkSecurityGroupResourceId: modNetworkSecurityGroup.outputs.resourceId
         routeTableResourceId: modRouteTable.outputs.resourceId
+        tags: {
+          Spoke: pTagDev
+          LastDeployed: pTime
+          Owner: 'Sandy'
+        }
       }
     ]
   }
@@ -210,6 +277,11 @@ module modProdSpokeVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1
     ]
     name: pProdVnetName
     location: pLocation
+    tags: {
+      Spoke: pTagProd
+      LastDeployed: pTime
+      Owner: 'Sandy'
+    }
     peerings: [
       {
         allowForwardedTraffic: true
@@ -220,7 +292,6 @@ module modProdSpokeVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1
         remotePeeringEnabled: true
         remotePeeringName: 'Prod-to-Hub-Peering'
         remoteVirtualNetworkId: modHubVirtualNetwork.outputs.resourceId
-        // useRemoteGateways: false
       }
     ]
     subnets: [
@@ -229,18 +300,33 @@ module modProdSpokeVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1
         addressPrefix: vProdAspAddress
         networkSecurityGroupResourceId: modNetworkSecurityGroup.outputs.resourceId
         routeTableResourceId: modRouteTable.outputs.resourceId
+        tags: {
+          Spoke: pTagProd
+          LastDeployed: pTime
+          Owner: 'Sandy'
+        }
       }
       {
         name: pSqlSubnetName
         addressPrefix: vProdSqlAddress
         networkSecurityGroupResourceId: modNetworkSecurityGroup.outputs.resourceId
         routeTableResourceId: modRouteTable.outputs.resourceId
+        tags: {
+          Spoke: pTagProd
+          LastDeployed: pTime
+          Owner: 'Sandy'
+        }
       }
       {
         name: pStSubnetName
         addressPrefix: vProdStAddress
         networkSecurityGroupResourceId: modNetworkSecurityGroup.outputs.resourceId
         routeTableResourceId: modRouteTable.outputs.resourceId
+        tags: {
+          Spoke: pTagProd
+          LastDeployed: pTime
+          Owner: 'Sandy'
+        }
       }
     ]
   }
@@ -251,6 +337,11 @@ module modRouteTable 'br/public:avm/res/network/route-table:0.2.1' = {
   params: {
     name: pRouteTableName
     location: pLocation
+    tags: {
+      Spoke: pTagGlobal
+      LastDeployed: pTime
+      Owner: 'Sandy'
+    }
     routes: [
       {
         name: 'defaultRoute'
@@ -293,22 +384,11 @@ module modNetworkSecurityGroup 'br/public:avm/res/network/network-security-group
   params: {
     name: 'DefaultNSG'
     location: pLocation
-    // securityRules: [
-    //   {
-    //     name: 'defaultRule'
-    //     properties: {
-    //       access: 'Allow'
-    //       description: 'description'
-    //       destinationAddressPrefix: '*'
-    //       destinationPortRange: '*'
-    //       direction: 'Inbound'
-    //       priority: 100
-    //       protocol: 'Tcp'
-    //       sourceAddressPrefix: '*'
-    //       sourcePortRange: '*'
-    //     }
-    //   }
-    // ]
+    tags: {
+      Spoke: pTagGlobal
+      LastDeployed: pTime
+      Owner: 'Sandy'
+    }
   }
 }
 
@@ -318,6 +398,11 @@ module modSqlPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' =
   name: 'SqlPrivateDNSZone'
   params: {
     name: varSqlEndpoint
+    tags: {
+      Spoke: pTagGlobal
+      LastDeployed: pTime
+      Owner: 'Sandy'
+    }
     virtualNetworkLinks: [
       {
         name: 'hub-link'
@@ -350,9 +435,12 @@ module modSqlPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' =
 module modStPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' = {
   name: 'StorageAccountPrivateDNSZone'
   params: {
-    // Required parameters
     name: varStEndpoint
-    // Non-required parameters
+    tags: {
+      Spoke: pTagGlobal
+      LastDeployed: pTime
+      Owner: 'Sandy'
+    }
     virtualNetworkLinks: [
       {
         name: 'hub-link'
@@ -386,6 +474,11 @@ module modKvPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' = 
   name: 'KeyVaultPrivateDNSZone'
   params: {
     name: varKeyVaultEndpoint
+    tags: {
+      Spoke: pTagGlobal
+      LastDeployed: pTime
+      Owner: 'Sandy'
+    }
     virtualNetworkLinks: [
       {
         name: 'hub-link'
@@ -418,9 +511,12 @@ module modKvPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' = 
 module modAspPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' = {
   name: 'AppServicePlanPrivateDNSZone'
   params: {
-    // Required parameters
     name: 'privatelink.azurewebsites.net'
-    // Non-required parameters
+    tags: {
+      Spoke: pTagGlobal
+      LastDeployed: pTime
+      Owner: 'Sandy'
+    }
     virtualNetworkLinks: [
       {
         name: 'hub-link'
@@ -464,6 +560,11 @@ module modBastionHost 'br/public:avm/res/network/bastion-host:0.1.1' = {
       name: pBastionPIPName
       skuName: 'Standard'
     }
+    tags: {
+      Spoke: pTagHub
+      LastDeployed: pTime
+      Owner: 'Sandy'
+    }
   }
 }
 
@@ -478,6 +579,11 @@ module modVirtualNetworkGateway 'br/public:avm/res/network/virtual-network-gatew
     vNetResourceId: modHubVirtualNetwork.outputs.resourceId
     location: pLocation
     gatewayPipName: pVPNGatewayPIPName
+    tags: {
+      Spoke: pTagHub
+      LastDeployed: pTime
+      Owner: 'Sandy'
+    }
   }
 }
 
@@ -549,6 +655,11 @@ module modCoreVirtualMachine 'br/public:avm/res/compute/virtual-machine:0.2.1' =
       monitoringWorkspaceResourceId: modLogAnalyticsWorkspace.outputs.resourceId
     }
     location: pLocation
+    tags: {
+      Spoke: pTagCore
+      LastDeployed: pTime
+      Owner: 'Sandy'
+    }
   }
 }
 
@@ -624,6 +735,11 @@ module MSVMI_PerfandDa_LandingZone 'br/public:avm/res/insights/data-collection-r
         ]
       }
     ]
+    tags: {
+      Spoke: pTagGlobal
+      LastDeployed: pTime
+      Owner: 'Sandy'
+    }
   }
 }
 
@@ -750,6 +866,11 @@ module dataCollectionEndpoint 'br/public:avm/res/insights/data-collection-endpoi
     kind: 'Windows'
     location: pLocation
     publicNetworkAccess: 'Enabled'
+    tags: {
+      Spoke: pTagGlobal
+      LastDeployed: pTime
+      Owner: 'Sandy'
+    }
   }
 }
 
@@ -808,9 +929,15 @@ module modEncryptionKeyVault 'br/public:avm/res/key-vault/vault:0.3.4' = {
           modKvPrivateDnsZone.outputs.resourceId
         ]
         service: 'vault'
+        name: pKeyVaultPrivEndpointName
         subnetResourceId: modCoreVirtualNetwork.outputs.subnetResourceIds[1]
       }
     ]
+    tags: {
+      Spoke: pTagCore
+      LastDeployed: pTime
+      Owner: 'Sandy'
+    }
   }
 }
 
@@ -827,6 +954,11 @@ module modDevAppServicePlan 'br/public:avm/res/web/serverfarm:0.1.0' = {
     kind: 'Linux'
     location: pLocation
     reserved: true
+    tags: {
+      Spoke: pTagDev
+      LastDeployed: pTime
+      Owner: 'Sandy'
+    }
   }
 }
 
@@ -841,6 +973,11 @@ module modProdAppServicePlan 'br/public:avm/res/web/serverfarm:0.1.0' = {
     kind: 'Linux'
     location: pLocation
     reserved: true
+    tags: {
+      Spoke: pTagProd
+      LastDeployed: pTime
+      Owner: 'Sandy'
+    }
   }
 }
 
@@ -875,9 +1012,15 @@ module modDevAppService 'br/public:avm/res/web/site:0.2.0' = {
         privateDnsZoneResourceIds: [
           modAspPrivateDnsZone.outputs.resourceId
         ]
+        name: pDevAppServicePrivEndpointName
         subnetResourceId: modDevSpokeVirtualNetwork.outputs.subnetResourceIds[0]
       }
     ]
+    tags: {
+      Spoke: pTagDev
+      LastDeployed: pTime
+      Owner: 'Sandy'
+    }
   }
 }
 
@@ -912,9 +1055,15 @@ module modProdAppService 'br/public:avm/res/web/site:0.2.0' = {
         privateDnsZoneResourceIds: [
           modAspPrivateDnsZone.outputs.resourceId
         ]
+        name: pProdAppServicePrivEndpointName
         subnetResourceId: modProdSpokeVirtualNetwork.outputs.subnetResourceIds[0]
       }
     ]
+    tags: {
+      Spoke: pTagProd
+      LastDeployed: pTime
+      Owner: 'Sandy'
+    }
   }
 }
 
@@ -926,6 +1075,11 @@ module modAppInsights 'br/public:avm/res/insights/component:0.2.0' = {
     location: pLocation
     kind: 'web'
     applicationType: 'web'
+    tags: {
+      Spoke: pTagGlobal
+      LastDeployed: pTime
+      Owner: 'Sandy'
+    }
   }
 }
 
@@ -934,9 +1088,7 @@ module modAppInsights 'br/public:avm/res/insights/component:0.2.0' = {
 module modLogAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0.3.1' = {
   name: 'LogAnalyticsWorkspace'
   params: {
-    // Required parameters
     name: pLogAnalyticsWorkspaceName
-    // Non-required parameters
     dailyQuotaGb: 10
     dataSources: [
       {
@@ -980,6 +1132,11 @@ module modLogAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspac
     publicNetworkAccessForIngestion: 'Enabled'
     publicNetworkAccessForQuery: 'Enabled'
     useResourcePermissions: true
+    tags: {
+      Spoke: pTagGlobal
+      LastDeployed: pTime
+      Owner: 'Sandy'
+    }
   }
 }
 
@@ -1016,10 +1173,16 @@ module modProdSqlServer 'br/public:avm/res/sql/server:0.1.5' = {
           modSqlPrivateDnsZone.outputs.resourceId
         ]
         service: 'sqlServer'
+        name: pProdSQLPrivEndpointName
         subnetResourceId: modProdSpokeVirtualNetwork.outputs.subnetResourceIds[1]
         customNetworkInterfaceName: 'pip-${vProdSqlServerName}'
       }
     ]
+    tags: {
+      Spoke: pTagProd
+      LastDeployed: pTime
+      Owner: 'Sandy'
+    }
   }
 }
 
@@ -1044,10 +1207,16 @@ module modDevSqlServer 'br/public:avm/res/sql/server:0.1.5' = {
           modSqlPrivateDnsZone.outputs.resourceId
         ]
         service: 'sqlServer'
+        name: pDevSQLPrivEndpointName
         subnetResourceId: modDevSpokeVirtualNetwork.outputs.subnetResourceIds[1]
         customNetworkInterfaceName: 'pip-${vDevSqlServerName}'
       }
     ]
+    tags: {
+      Spoke: pTagDev
+      LastDeployed: pTime
+      Owner: 'Sandy'
+    }
   }
 }
 
@@ -1064,10 +1233,16 @@ module modProdStorageAccount 'br/public:avm/res/storage/storage-account:0.6.2' =
           modStPrivateDnsZone.outputs.resourceId
         ]
         service: 'blob'
+        name: pProdStPrivEndpointName
         subnetResourceId: modProdSpokeVirtualNetwork.outputs.subnetResourceIds[2]
         customNetworkInterfaceName: 'pip-${pProdStName}'
       }
     ]
+    tags: {
+      Spoke: pTagProd
+      LastDeployed: pTime
+      Owner: 'Sandy'
+    }
   }
 }
 
@@ -1084,10 +1259,16 @@ module modDevStorageAccount 'br/public:avm/res/storage/storage-account:0.6.2' = 
           modStPrivateDnsZone.outputs.resourceId
         ]
         service: 'blob'
+        name: pDevStPrivEndpointName
         subnetResourceId: modDevSpokeVirtualNetwork.outputs.subnetResourceIds[2]
         customNetworkInterfaceName: 'pip-${pDevStName}'
       }
     ]
+    tags: {
+      Spoke: pTagDev
+      LastDeployed: pTime
+      Owner: 'Sandy'
+    }
   }
 }
 
@@ -1184,6 +1365,11 @@ module applicationGateway './ResourceModules/modules/network/application-gateway
         }
       }
     ]
+    tags: {
+      Spoke: pTagHub
+      LastDeployed: pTime
+      Owner: 'Sandy'
+    }
   }
 }
 
@@ -1194,6 +1380,11 @@ module modAppGatewayPIP 'br/public:avm/res/network/public-ip-address:0.2.2' = {
     location:pLocation
     skuName: 'Standard'
     publicIPAllocationMethod:'Static'
+    tags: {
+      Spoke: pTagHub
+      LastDeployed: pTime
+      Owner: 'Sandy'
+    }
   }
 }
 
@@ -1204,6 +1395,11 @@ module modRecoveryServiceVault './ResourceModules/modules/recovery-services/vaul
   params: {
     name: pRSVName
     location: pLocation
+    tags: {
+      Spoke: pTagGlobal
+      LastDeployed: pTime
+      Owner: 'Sandy'
+    }
   }
 }
 
@@ -1237,6 +1433,11 @@ module azureFirewall './ResourceModules/modules/network/azure-firewall/main.bice
         workspaceResourceId: modLogAnalyticsWorkspace.outputs.resourceId  
       }
     ]
+    tags: {
+      Spoke: pTagHub
+      LastDeployed: pTime
+      Owner: 'Sandy'
+    }
   }
 }
 
@@ -1282,5 +1483,10 @@ module firewallPolicy 'br/public:avm/res/network/firewall-policy:0.1.1' = {
       }
     ]
     threatIntelMode: 'Alert'
+    tags: {
+      Spoke: pTagGlobal
+      LastDeployed: pTime
+      Owner: 'Sandy'
+    }
   }
 }
