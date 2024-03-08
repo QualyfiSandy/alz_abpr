@@ -1,5 +1,6 @@
 
 param pLocation string
+param pDeployer string
 
 param pHubVnetName string
 param pCoreVnetName string
@@ -61,7 +62,6 @@ param pProdSQLPrivEndpointName string
 param pDevSQLPrivEndpointName string
 param pProdStPrivEndpointName string
 param pDevStPrivEndpointName string
-param pDeployUserName string
 
 param pHubVnetAddressPrefix string
 param pCoreVnetAddressPrefix string
@@ -117,7 +117,7 @@ module modHubVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.1' = 
     tags: {
       Spoke: pTagHub
       LastDeployed: pTime
-      Owner: pDeployUserName
+      DeployedBy: pDeployer
     }
     name: pHubVnetName
     addressPrefixes: [
@@ -131,7 +131,7 @@ module modHubVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.1' = 
         tags: {
           Spoke: pTagHub
           LastDeployed: pTime
-          Owner: 'Sandy'
+          DeployedBy: pDeployer
         }
       }
       {
@@ -140,7 +140,7 @@ module modHubVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.1' = 
         tags: {
           Spoke: pTagHub
           LastDeployed: pTime
-          Owner: 'Sandy'
+          DeployedBy: pDeployer
         }
       }
       {
@@ -149,7 +149,7 @@ module modHubVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.1' = 
         tags: {
           Spoke: pTagHub
           LastDeployed: pTime
-          Owner: 'Sandy'
+          DeployedBy: pDeployer
         }
       }
       {
@@ -158,7 +158,7 @@ module modHubVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.1' = 
         tags: {
           Spoke: pTagHub
           LastDeployed: pTime
-          Owner: 'Sandy'
+          DeployedBy: pDeployer
         }
       }
     ]
@@ -176,7 +176,7 @@ module modCoreVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.1' =
     tags: {
       Spoke: pTagCore
       LastDeployed: pTime
-      Owner: 'Sandy'
+      DeployedBy: pDeployer
     }
     peerings: [
       {
@@ -199,7 +199,7 @@ module modCoreVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.1' =
         tags: {
           Spoke: pTagCore
           LastDeployed: pTime
-          Owner: 'Sandy'
+          DeployedBy: pDeployer
         }
       }
       {
@@ -210,7 +210,7 @@ module modCoreVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.1' =
         tags: {
           Spoke: pTagCore
           LastDeployed: pTime
-          Owner: 'Sandy'
+          DeployedBy: pDeployer
         }
       }
     ]
@@ -228,7 +228,7 @@ module modDevSpokeVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.
     tags: {
       Spoke: pTagDev
       LastDeployed: pTime
-      Owner: 'Sandy'
+      DeployedBy: pDeployer
     }
     peerings: [
       {
@@ -251,7 +251,7 @@ module modDevSpokeVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.
         tags: {
           Spoke: pTagDev
           LastDeployed: pTime
-          Owner: 'Sandy'
+          DeployedBy: pDeployer
         }
       }
       {
@@ -262,7 +262,7 @@ module modDevSpokeVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.
         tags: {
           Spoke: pTagDev
           LastDeployed: pTime
-          Owner: 'Sandy'
+          DeployedBy: pDeployer
         }
       }
       {
@@ -273,7 +273,7 @@ module modDevSpokeVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1.
         tags: {
           Spoke: pTagDev
           LastDeployed: pTime
-          Owner: 'Sandy'
+          DeployedBy: pDeployer
         }
       }
     ]
@@ -291,7 +291,7 @@ module modProdSpokeVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1
     tags: {
       Spoke: pTagProd
       LastDeployed: pTime
-      Owner: 'Sandy'
+      DeployedBy: pDeployer
     }
     peerings: [
       {
@@ -314,7 +314,7 @@ module modProdSpokeVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1
         tags: {
           Spoke: pTagProd
           LastDeployed: pTime
-          Owner: 'Sandy'
+          DeployedBy: pDeployer
         }
       }
       {
@@ -325,7 +325,7 @@ module modProdSpokeVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1
         tags: {
           Spoke: pTagProd
           LastDeployed: pTime
-          Owner: 'Sandy'
+          DeployedBy: pDeployer
         }
       }
       {
@@ -336,7 +336,7 @@ module modProdSpokeVirtualNetwork 'br/public:avm/res/network/virtual-network:0.1
         tags: {
           Spoke: pTagProd
           LastDeployed: pTime
-          Owner: 'Sandy'
+          DeployedBy: pDeployer
         }
       }
     ]
@@ -351,7 +351,7 @@ module modRouteTable 'br/public:avm/res/network/route-table:0.2.1' = {
     tags: {
       Spoke: pTagGlobal
       LastDeployed: pTime
-      Owner: 'Sandy'
+      DeployedBy: pDeployer
     }
     routes: [
       {
@@ -398,7 +398,7 @@ module modNetworkSecurityGroup 'br/public:avm/res/network/network-security-group
     tags: {
       Spoke: pTagGlobal
       LastDeployed: pTime
-      Owner: 'Sandy'
+      DeployedBy: pDeployer
     }
   }
 }
@@ -412,7 +412,7 @@ module modSqlPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' =
     tags: {
       Spoke: pTagGlobal
       LastDeployed: pTime
-      Owner: 'Sandy'
+      DeployedBy: pDeployer
     }
     virtualNetworkLinks: [
       {
@@ -450,7 +450,7 @@ module modStPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' = 
     tags: {
       Spoke: pTagGlobal
       LastDeployed: pTime
-      Owner: 'Sandy'
+      DeployedBy: pDeployer
     }
     virtualNetworkLinks: [
       {
@@ -488,7 +488,7 @@ module modKvPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' = 
     tags: {
       Spoke: pTagGlobal
       LastDeployed: pTime
-      Owner: 'Sandy'
+      DeployedBy: pDeployer
     }
     virtualNetworkLinks: [
       {
@@ -526,7 +526,7 @@ module modAspPrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.2.3' =
     tags: {
       Spoke: pTagGlobal
       LastDeployed: pTime
-      Owner: 'Sandy'
+      DeployedBy: pDeployer
     }
     virtualNetworkLinks: [
       {
@@ -574,7 +574,7 @@ module modBastionHost 'br/public:avm/res/network/bastion-host:0.1.1' = {
     tags: {
       Spoke: pTagHub
       LastDeployed: pTime
-      Owner: 'Sandy'
+      DeployedBy: pDeployer
     }
   }
 }
@@ -593,7 +593,7 @@ module modVirtualNetworkGateway 'br/public:avm/res/network/virtual-network-gatew
     tags: {
       Spoke: pTagHub
       LastDeployed: pTime
-      Owner: 'Sandy'
+      DeployedBy: pDeployer
     }
   }
 }
@@ -669,7 +669,7 @@ module modCoreVirtualMachine 'br/public:avm/res/compute/virtual-machine:0.2.1' =
     tags: {
       Spoke: pTagCore
       LastDeployed: pTime
-      Owner: 'Sandy'
+      DeployedBy: pDeployer
     }
   }
 }
@@ -749,7 +749,7 @@ module MSVMI_PerfandDa_LandingZone 'br/public:avm/res/insights/data-collection-r
     tags: {
       Spoke: pTagGlobal
       LastDeployed: pTime
-      Owner: 'Sandy'
+      DeployedBy: pDeployer
     }
   }
 }
@@ -880,7 +880,7 @@ module dataCollectionEndpoint 'br/public:avm/res/insights/data-collection-endpoi
     tags: {
       Spoke: pTagGlobal
       LastDeployed: pTime
-      Owner: 'Sandy'
+      DeployedBy: pDeployer
     }
   }
 }
@@ -947,7 +947,7 @@ module modEncryptionKeyVault 'br/public:avm/res/key-vault/vault:0.3.4' = {
     tags: {
       Spoke: pTagCore
       LastDeployed: pTime
-      Owner: 'Sandy'
+      DeployedBy: pDeployer
     }
   }
 }
@@ -968,7 +968,7 @@ module modDevAppServicePlan 'br/public:avm/res/web/serverfarm:0.1.0' = {
     tags: {
       Spoke: pTagDev
       LastDeployed: pTime
-      Owner: 'Sandy'
+      DeployedBy: pDeployer
     }
   }
 }
@@ -987,7 +987,7 @@ module modProdAppServicePlan 'br/public:avm/res/web/serverfarm:0.1.0' = {
     tags: {
       Spoke: pTagProd
       LastDeployed: pTime
-      Owner: 'Sandy'
+      DeployedBy: pDeployer
     }
   }
 }
@@ -1030,7 +1030,7 @@ module modDevAppService 'br/public:avm/res/web/site:0.2.0' = {
     tags: {
       Spoke: pTagDev
       LastDeployed: pTime
-      Owner: 'Sandy'
+      DeployedBy: pDeployer
     }
   }
 }
@@ -1073,7 +1073,7 @@ module modProdAppService 'br/public:avm/res/web/site:0.2.0' = {
     tags: {
       Spoke: pTagProd
       LastDeployed: pTime
-      Owner: 'Sandy'
+      DeployedBy: pDeployer
     }
   }
 }
@@ -1089,7 +1089,7 @@ module modAppInsights 'br/public:avm/res/insights/component:0.2.0' = {
     tags: {
       Spoke: pTagGlobal
       LastDeployed: pTime
-      Owner: 'Sandy'
+      DeployedBy: pDeployer
     }
   }
 }
@@ -1146,7 +1146,7 @@ module modLogAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspac
     tags: {
       Spoke: pTagGlobal
       LastDeployed: pTime
-      Owner: 'Sandy'
+      DeployedBy: pDeployer
     }
   }
 }
@@ -1192,7 +1192,7 @@ module modProdSqlServer 'br/public:avm/res/sql/server:0.1.5' = {
     tags: {
       Spoke: pTagProd
       LastDeployed: pTime
-      Owner: 'Sandy'
+      DeployedBy: pDeployer
     }
   }
 }
@@ -1226,7 +1226,7 @@ module modDevSqlServer 'br/public:avm/res/sql/server:0.1.5' = {
     tags: {
       Spoke: pTagDev
       LastDeployed: pTime
-      Owner: 'Sandy'
+      DeployedBy: pDeployer
     }
   }
 }
@@ -1252,7 +1252,7 @@ module modProdStorageAccount 'br/public:avm/res/storage/storage-account:0.6.2' =
     tags: {
       Spoke: pTagProd
       LastDeployed: pTime
-      Owner: 'Sandy'
+      DeployedBy: pDeployer
     }
   }
 }
@@ -1278,7 +1278,7 @@ module modDevStorageAccount 'br/public:avm/res/storage/storage-account:0.6.2' = 
     tags: {
       Spoke: pTagDev
       LastDeployed: pTime
-      Owner: 'Sandy'
+      DeployedBy: pDeployer
     }
   }
 }
@@ -1379,7 +1379,7 @@ module applicationGateway './ResourceModules/modules/network/application-gateway
     tags: {
       Spoke: pTagHub
       LastDeployed: pTime
-      Owner: 'Sandy'
+      DeployedBy: pDeployer
     }
   }
 }
@@ -1394,7 +1394,7 @@ module modAppGatewayPIP 'br/public:avm/res/network/public-ip-address:0.2.2' = {
     tags: {
       Spoke: pTagHub
       LastDeployed: pTime
-      Owner: 'Sandy'
+      DeployedBy: pDeployer
     }
   }
 }
@@ -1409,7 +1409,7 @@ module modRecoveryServiceVault './ResourceModules/modules/recovery-services/vaul
     tags: {
       Spoke: pTagGlobal
       LastDeployed: pTime
-      Owner: 'Sandy'
+      DeployedBy: pDeployer
     }
   }
 }
@@ -1447,7 +1447,7 @@ module azureFirewall './ResourceModules/modules/network/azure-firewall/main.bice
     tags: {
       Spoke: pTagHub
       LastDeployed: pTime
-      Owner: 'Sandy'
+      DeployedBy: pDeployer
     }
   }
 }
@@ -1497,7 +1497,7 @@ module firewallPolicy 'br/public:avm/res/network/firewall-policy:0.1.1' = {
     tags: {
       Spoke: pTagGlobal
       LastDeployed: pTime
-      Owner: 'Sandy'
+      DeployedBy: pDeployer
     }
   }
 }
