@@ -96,6 +96,16 @@ var vAppGwId = resourceId('Microsoft.Network/applicationGateways',pAppGatewayNam
 var vRand = substring(uniqueString(resourceGroup().id),0,5)
 var vProdSqlServerName = '${pProdSqlServerName}${vRand}'
 var vDevSqlServerName = '${pDevSqlServerName}${vRand}'
+var vKeyVaultEncryptName = '${pCoreEncryptionKeyVaultName}${vRand}'
+var vDevAppServicePlanName = '${pDevAppServicePlanName}${vRand}'
+var vProdAppServicePlanName = '${pProdAppServicePlanName}${vRand}'
+var vDevAppServiceName = '${pDevAppServiceName}${vRand}'
+var vProdAppServiceName = '${pProdAppServiceName}${vRand}'
+var vDevStName = '${pDevStName}${vRand}'
+var vProdStName = '${pProdStName}${vRand}'
+var vLogAnalyticsWorkspaceName = '${pLogAnalyticsWorkspaceName}${vRand}'
+var vProdSqlDatabaseName = '${pProdSqlDatabaseName}${vRand}'
+var vDevSqlDatabaseName = '${pDevSqlDatabaseName}${vRand}'
 
 resource coreSecKeyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {name: pCoreSecKeyVaultName}
 
@@ -894,7 +904,7 @@ module DCRAssociation './modules/dcr_association.bicep' = {
 module modEncryptionKeyVault 'br/public:avm/res/key-vault/vault:0.3.4' = {
   name: 'CoreEcryptionKeyVault'
   params: {
-    name: '${pCoreEncryptionKeyVaultName}${vRand}'
+    name: vKeyVaultEncryptName
     sku: 'standard'
     enableRbacAuthorization: false
     enablePurgeProtection: false
@@ -947,7 +957,7 @@ module modEncryptionKeyVault 'br/public:avm/res/key-vault/vault:0.3.4' = {
 module modDevAppServicePlan 'br/public:avm/res/web/serverfarm:0.1.0' = {
   name: 'DevAppServicePlan'
   params: {
-    name: pDevAppServicePlanName
+    name: vDevAppServicePlanName
     sku: {
       name: pAppServicePlanSku
       tier: pAppServicePlanTier
@@ -966,7 +976,7 @@ module modDevAppServicePlan 'br/public:avm/res/web/serverfarm:0.1.0' = {
 module modProdAppServicePlan 'br/public:avm/res/web/serverfarm:0.1.0' = {
   name: 'ProdAppServicePlan'
   params: {
-    name: pProdAppServicePlanName
+    name: vProdAppServicePlanName
     sku: {
       name: pAppServicePlanSku
       tier: pAppServicePlanTier
@@ -986,7 +996,7 @@ module modDevAppService 'br/public:avm/res/web/site:0.2.0' = {
   name: 'DevAppService'
   params: {
     kind: 'app'
-    name: pDevAppServiceName
+    name: vDevAppServiceName
     serverFarmResourceId: modDevAppServicePlan.outputs.resourceId
     appInsightResourceId: modAppInsights.outputs.resourceId
     location: pLocation
@@ -1029,7 +1039,7 @@ module modProdAppService 'br/public:avm/res/web/site:0.2.0' = {
   name: 'ProdAppService'
   params: {
     kind: 'app'
-    name: pProdAppServiceName
+    name: vProdAppServiceName
     serverFarmResourceId: modProdAppServicePlan.outputs.resourceId
     appInsightResourceId: modAppInsights.outputs.resourceId
     location: pLocation
@@ -1089,7 +1099,7 @@ module modAppInsights 'br/public:avm/res/insights/component:0.2.0' = {
 module modLogAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0.3.1' = {
   name: 'LogAnalyticsWorkspace'
   params: {
-    name: pLogAnalyticsWorkspaceName
+    name: vLogAnalyticsWorkspaceName
     dailyQuotaGb: 10
     dataSources: [
       {
@@ -1162,7 +1172,7 @@ module modProdSqlServer 'br/public:avm/res/sql/server:0.1.5' = {
     location: pLocation
     databases: [
       {
-        name: '${pProdSqlDatabaseName}${vRand}'
+        name: vProdSqlDatabaseName
         skuName: 'Basic'
         skuTier: 'Basic'
         maxSizeBytes: 2147483648
@@ -1196,7 +1206,7 @@ module modDevSqlServer 'br/public:avm/res/sql/server:0.1.5' = {
     location: pLocation
     databases: [
       {
-        name: '${pDevSqlDatabaseName}${vRand}'
+        name: vDevSqlDatabaseName
         skuName: 'Basic'
         skuTier: 'Basic'
         maxSizeBytes: 2147483648
@@ -1224,7 +1234,7 @@ module modDevSqlServer 'br/public:avm/res/sql/server:0.1.5' = {
 module modProdStorageAccount 'br/public:avm/res/storage/storage-account:0.6.2' = {
   name: 'ProdStorageAccount'
   params: {
-    name: pProdStName
+    name: vProdStName
     kind: pStKind
     skuName: pStSkuName
     location: pLocation
@@ -1250,7 +1260,7 @@ module modProdStorageAccount 'br/public:avm/res/storage/storage-account:0.6.2' =
 module modDevStorageAccount 'br/public:avm/res/storage/storage-account:0.6.2' = {
   name: 'DevStorageAccount'
   params: {
-    name: pDevStName
+    name: vDevStName
     kind: pStKind
     skuName: pStSkuName
     location: pLocation
