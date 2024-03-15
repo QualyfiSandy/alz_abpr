@@ -3,7 +3,7 @@ using './main.bicep'
 param pLocation = 'uksouth'
 
 // Name of the individual deploying the resources. No current way to pass in Entra ID so needs to be hardcoded
-param pDeployer = 'Alexander Pendleton'
+param pDeployer = ''
 
 param pCoreSecKeyVaultName = 'kv-sec-core-sandy'
 param pHubVnetName = 'hub-${pLocation}-001'

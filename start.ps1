@@ -59,6 +59,6 @@
 #run the bicep file
 
 $UserName = az ad signed-in-user show --query * --output table | Select-Object -Index 4
-new-AzResourceGroupDeployment -TemplateFile main.bicep -pDeployUserName $UserName
+new-AzResourceGroupDeployment -TemplateFile main.bicep -pDeployer $UserName
 
 # -keyVaultName $kvname -keyVaultObjectId $keyvaultojectId 

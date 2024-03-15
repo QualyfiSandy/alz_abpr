@@ -49,7 +49,7 @@ param pAppGatewayPIPName string
 param pAzureFirewallName string
 param pAzureFirewallPIPName string
 param pAzureFirewallPolicyName string
-param pTime string = utcNow('d')
+param pTime string = utcNow('yyyy-MM-dd HH:mm:ss')
 param pTagHub string
 param pTagCore string
 param pTagDev string
@@ -106,6 +106,9 @@ var vProdStName = '${pProdStName}${vRand}'
 var vLogAnalyticsWorkspaceName = '${pLogAnalyticsWorkspaceName}${vRand}'
 var vProdSqlDatabaseName = '${pProdSqlDatabaseName}${vRand}'
 var vDevSqlDatabaseName = '${pDevSqlDatabaseName}${vRand}'
+
+// Used to deploy modules for both production and development spokes. 0 = Development, 1 = Production
+var vEnv = [0,1]
 
 resource coreSecKeyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {name: pCoreSecKeyVaultName}
 
@@ -893,7 +896,6 @@ module DCRAssociation './modules/dcr_association.bicep' = {
     modCoreVirtualMachine
   ]
   params: {
-    // pDCREndpointId: dataCollectionEndpoint.outputs.resourceId
     pDCRId: MSVMI_PerfandDa_LandingZone.outputs.resourceId
     pVMName: pVMName
   }
@@ -1078,6 +1080,16 @@ module modProdAppService 'br/public:avm/res/web/site:0.2.0' = {
   }
 }
 
+// <--- SOURCE CONTROL ---> //
+
+module modsrcctrl './modules/srcctrl.bicep' =[for spoke in vEnv: {
+  name: '${(spoke==0) ? 'dev' : 'prod'}-sourceControl' 
+  params: {
+    paramsrcctrlname: 'web'
+    pAppServiceName: (spoke==0) ? modDevAppService.outputs.name : modProdAppService.outputs.name
+  }
+}]
+
 module modAppInsights 'br/public:avm/res/insights/component:0.2.0' = {
   name: 'appInsights'
   params: {
@@ -1148,16 +1160,6 @@ module modLogAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspac
       LastDeployed: pTime
       DeployedBy: pDeployer
     }
-  }
-}
-
-// <--- SOURCE CONTROL ---> //
-
-module modsrcctrl './modules/srcctrl.bicep' = {
-  name: 'src-control'
-  params: {
-    paramsrcctrlname: 'web'
-    pAppServiceName: modProdAppService.outputs.name
   }
 }
 
